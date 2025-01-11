@@ -7,9 +7,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Package } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Package, Search } from "lucide-react";
+import { useState } from "react";
 
 const Shipments = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -17,6 +21,15 @@ const Shipments = () => {
         <Button>
           <Package className="mr-2 h-4 w-4" /> Create Shipment
         </Button>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search shipments..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-sm"
+        />
       </div>
       <div className="rounded-md border">
         <Table>
