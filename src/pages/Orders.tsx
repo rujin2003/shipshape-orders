@@ -15,18 +15,31 @@ import { useState } from "react";
 const Orders = () => {
   const [showNewOrder, setShowNewOrder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentOrderId, setCurrentOrderId] = useState("");
+
+  const generateRandomOrderId = () => {
+    const randomNum = Math.floor(Math.random() * 10000);
+    return `ORD${randomNum.toString().padStart(4, '0')}`;
+  };
+
+  const handleNewOrder = () => {
+    setCurrentOrderId(generateRandomOrderId());
+    setShowNewOrder(true);
+  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
-        <Button onClick={() => setShowNewOrder(!showNewOrder)}>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {showNewOrder ? `New Order - ${currentOrderId}` : 'Orders'}
+        </h2>
+        <Button onClick={handleNewOrder}>
           <Plus className="mr-2 h-4 w-4" /> New Order
         </Button>
       </div>
 
       {showNewOrder ? (
-        <NewOrderForm />
+        <NewOrderForm orderId={currentOrderId} />
       ) : (
         <>
           <div className="flex items-center space-x-2">

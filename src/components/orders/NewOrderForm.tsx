@@ -42,9 +42,17 @@ interface OrderFormData {
   items: OrderItem[];
 }
 
-const NewOrderForm = () => {
+interface NewOrderFormProps {
+  orderId: string;
+}
+
+const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
   const [items, setItems] = useState<OrderItem[]>([]);
-  const form = useForm<OrderFormData>();
+  const form = useForm<OrderFormData>({
+    defaultValues: {
+      orderId: orderId,
+    },
+  });
 
   const addItem = () => {
     setItems([
@@ -82,7 +90,7 @@ const NewOrderForm = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>New Order</CardTitle>
+            <CardTitle>Order Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,7 +101,7 @@ const NewOrderForm = () => {
                   <FormItem>
                     <FormLabel>Order ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="Order ID" {...field} />
+                      <Input placeholder="Order ID" {...field} disabled />
                     </FormControl>
                   </FormItem>
                 )}
