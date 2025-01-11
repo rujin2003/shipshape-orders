@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import Orders from "./pages/Orders";
 import Customers from "./pages/Customers";
 import Shipments from "./pages/Shipments";
-import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +25,6 @@ const App = () => (
               <Route path="/orders" element={<Orders />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/shipments" element={<Shipments />} />
-              <Route path="/reports" element={<Reports />} />
             </Routes>
           </main>
         </div>

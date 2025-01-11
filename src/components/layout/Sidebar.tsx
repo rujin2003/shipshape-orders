@@ -5,7 +5,6 @@ import {
   ShoppingCart,
   Users,
   Package,
-  BarChart3,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -16,7 +15,6 @@ const Sidebar = () => {
     { href: "/orders", label: "Orders", icon: ShoppingCart },
     { href: "/customers", label: "Customers", icon: Users },
     { href: "/shipments", label: "Shipments", icon: Package },
-    { href: "/reports", label: "Reports", icon: BarChart3 },
   ];
 
   return (
