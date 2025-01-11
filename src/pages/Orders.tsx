@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, ArrowLeft } from "lucide-react";
 import NewOrderForm from "@/components/orders/NewOrderForm";
 import { useState } from "react";
 
@@ -27,15 +27,26 @@ const Orders = () => {
     setShowNewOrder(true);
   };
 
+  const handleCancel = () => {
+    setShowNewOrder(false);
+    setCurrentOrderId("");
+  };
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">
           {showNewOrder ? `New Order - ${currentOrderId}` : 'Orders'}
         </h2>
-        <Button onClick={handleNewOrder}>
-          <Plus className="mr-2 h-4 w-4" /> New Order
-        </Button>
+        {showNewOrder ? (
+          <Button variant="outline" onClick={handleCancel}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
+          </Button>
+        ) : (
+          <Button onClick={handleNewOrder}>
+            <Plus className="mr-2 h-4 w-4" /> New Order
+          </Button>
+        )}
       </div>
 
       {showNewOrder ? (
