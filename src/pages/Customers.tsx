@@ -9,10 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { UserPlus, Pencil } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NewCustomerForm from "@/components/customers/NewCustomerForm";
 import EditCustomerForm from "@/components/customers/EditCustomerForm";
 
 const Customers = () => {
+  const navigate = useNavigate();
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<null | {
     name: string;
@@ -35,6 +37,10 @@ const Customers = () => {
 
   const handleCancelEdit = () => {
     setEditingCustomer(null);
+  };
+
+  const handleRowClick = (customerId: string) => {
+    navigate(`/customers/${customerId}`);
   };
 
   return (
@@ -65,7 +71,10 @@ const Customers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
+              <TableRow 
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => handleRowClick("1")}
+              >
                 <TableCell className="font-medium">John Doe</TableCell>
                 <TableCell>john@example.com</TableCell>
                 <TableCell>+1234567890</TableCell>
@@ -76,15 +85,16 @@ const Customers = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleEdit({
                         name: "John Doe",
                         email: "john@example.com",
                         phone: "+1234567890",
                         country: "United States",
                         address: "123 Main St, City, State",
-                      })
-                    }
+                      });
+                    }}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>

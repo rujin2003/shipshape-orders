@@ -7,6 +7,7 @@ import Sidebar from "./components/layout/Sidebar";
 import Index from "./pages/Index";
 import Orders from "./pages/Orders";
 import Customers from "./pages/Customers";
+import CustomerDetails from "./pages/CustomerDetails";
 import Shipments from "./pages/Shipments";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/customers" element={<Customers />} />
+              <Route path="/customers/:id" element={<CustomerDetails />} />
               <Route path="/shipments" element={<Shipments />} />
             </Routes>
           </main>
