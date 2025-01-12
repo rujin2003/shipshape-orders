@@ -7,12 +7,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Pencil } from "lucide-react";
 import { useState } from "react";
 import NewCustomerForm from "@/components/customers/NewCustomerForm";
+import EditCustomerForm from "@/components/customers/EditCustomerForm";
 
 const Customers = () => {
   const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<null | {
+    name: string;
+    email: string;
+    phone: string;
+    country: string;
+    address: string;
+  }>(null);
+
+  const handleEdit = (customer: {
+    name: string;
+    email: string;
+    phone: string;
+    country: string;
+    address: string;
+  }) => {
+    setEditingCustomer(customer);
+    setShowNewCustomer(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCustomer(null);
+  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -25,6 +48,8 @@ const Customers = () => {
 
       {showNewCustomer ? (
         <NewCustomerForm />
+      ) : editingCustomer ? (
+        <EditCustomerForm customer={editingCustomer} onCancel={handleCancelEdit} />
       ) : (
         <div className="rounded-md border">
           <Table>
@@ -36,6 +61,7 @@ const Customers = () => {
                 <TableHead>Country</TableHead>
                 <TableHead>Orders</TableHead>
                 <TableHead>Total Spent</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -46,6 +72,23 @@ const Customers = () => {
                 <TableCell>United States</TableCell>
                 <TableCell>5</TableCell>
                 <TableCell>$543.00</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      handleEdit({
+                        name: "John Doe",
+                        email: "john@example.com",
+                        phone: "+1234567890",
+                        country: "United States",
+                        address: "123 Main St, City, State",
+                      })
+                    }
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
