@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, ArrowLeft, ChevronDown } from "lucide-react";
+import { Plus, Search, ArrowLeft } from "lucide-react";
 import NewOrderForm from "@/components/orders/NewOrderForm";
 import { useState } from "react";
 import {
@@ -97,21 +97,23 @@ const Orders = () => {
               <TableBody>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="order-1" className="border-none">
-                    <AccordionTrigger className="hover:no-underline w-full">
-                      <TableRow className="hover:bg-transparent">
-                        <TableCell className="font-medium">ORD001</TableCell>
-                        <TableCell>John Doe</TableCell>
-                        <TableCell className={cn(getStatusColor("pending"))}>
-                          Pending
-                        </TableCell>
-                        <TableCell>3</TableCell>
-                        <TableCell>$156.00</TableCell>
-                        <TableCell>2024-03-20</TableCell>
-                      </TableRow>
+                    <AccordionTrigger className="hover:no-underline w-full data-[state=open]:bg-muted/50">
+                      <div className="w-full">
+                        <TableRow className="hover:bg-transparent w-full">
+                          <TableCell className="font-medium">ORD001</TableCell>
+                          <TableCell>John Doe</TableCell>
+                          <TableCell className={cn(getStatusColor("pending"))}>
+                            Pending
+                          </TableCell>
+                          <TableCell>3</TableCell>
+                          <TableCell>$156.00</TableCell>
+                          <TableCell>2024-03-20</TableCell>
+                        </TableRow>
+                      </div>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="px-4 py-2 bg-muted/50">
-                        <h4 className="font-semibold mb-2">Order Items:</h4>
+                        <h4 className="font-semibold mb-2 text-left">Order Items:</h4>
                         <ul className="space-y-2">
                           <li className="flex justify-between">
                             <span>Product A</span>
