@@ -86,12 +86,12 @@ const Orders = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[100px]">Order ID</TableHead>
+                  <TableHead className="w-[150px]">Customer</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="w-[80px]">Items</TableHead>
+                  <TableHead className="w-[100px]">Total</TableHead>
+                  <TableHead className="w-[120px]">Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -100,30 +100,30 @@ const Orders = () => {
                     <AccordionTrigger className="hover:no-underline w-full data-[state=open]:bg-muted/50">
                       <div className="w-full">
                         <TableRow className="hover:bg-transparent w-full">
-                          <TableCell className="font-medium">ORD001</TableCell>
-                          <TableCell>John Doe</TableCell>
-                          <TableCell className={cn(getStatusColor("pending"))}>
+                          <TableCell className="w-[100px] font-medium">ORD001</TableCell>
+                          <TableCell className="w-[150px]">John Doe</TableCell>
+                          <TableCell className={cn("w-[100px]", getStatusColor("pending"))}>
                             Pending
                           </TableCell>
-                          <TableCell>3</TableCell>
-                          <TableCell>$156.00</TableCell>
-                          <TableCell>2024-03-20</TableCell>
+                          <TableCell className="w-[80px]">3</TableCell>
+                          <TableCell className="w-[100px]">$156.00</TableCell>
+                          <TableCell className="w-[120px]">2024-03-20</TableCell>
                         </TableRow>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="px-4 py-2 bg-muted/50">
+                      <div className="px-4 py-2 bg-muted/50 w-full">
                         <h4 className="font-semibold mb-2 text-left">Order Items:</h4>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between">
+                        <ul className="space-y-2 w-full">
+                          <li className="flex justify-between w-full">
                             <span>Product A</span>
                             <span>$50.00 x 1</span>
                           </li>
-                          <li className="flex justify-between">
+                          <li className="flex justify-between w-full">
                             <span>Product B</span>
                             <span>$75.00 x 1</span>
                           </li>
-                          <li className="flex justify-between">
+                          <li className="flex justify-between w-full">
                             <span>Product C</span>
                             <span>$31.00 x 1</span>
                           </li>
