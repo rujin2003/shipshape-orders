@@ -11,13 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Plus, Search, ArrowLeft } from "lucide-react";
 import NewOrderForm from "@/components/orders/NewOrderForm";
 import { useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
 
 const Orders = () => {
   const [showNewOrder, setShowNewOrder] = useState(false);
@@ -37,19 +30,6 @@ const Orders = () => {
   const handleCancel = () => {
     setShowNewOrder(false);
     setCurrentOrderId("");
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'text-red-500';
-      case 'due':
-        return 'text-red-500';
-      case 'shipped':
-        return 'text-green-500';
-      default:
-        return '';
-    }
   };
 
   return (
@@ -86,52 +66,23 @@ const Orders = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-32">Order ID</TableHead>
-                  <TableHead className="w-48">Customer</TableHead>
-                  <TableHead className="w-32">Status</TableHead>
-                  <TableHead className="w-24">Items</TableHead>
-                  <TableHead className="w-32">Total</TableHead>
-                  <TableHead className="w-32">Date</TableHead>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="order-1" className="border-none">
-                    <AccordionTrigger className="hover:no-underline w-full data-[state=open]:bg-muted/50 [&>svg]:hidden">
-                      <div className="w-full">
-                        <TableRow className="hover:bg-transparent w-full">
-                          <TableCell className="w-32 font-medium">ORD001</TableCell>
-                          <TableCell className="w-48">John Doe</TableCell>
-                          <TableCell className={cn("w-32", getStatusColor("pending"))}>
-                            Pending
-                          </TableCell>
-                          <TableCell className="w-24">3</TableCell>
-                          <TableCell className="w-32">$156.00</TableCell>
-                          <TableCell className="w-32">2024-03-20</TableCell>
-                        </TableRow>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="px-4 py-2 bg-muted/50 w-full">
-                        <h4 className="font-semibold mb-2 text-left">Order Items:</h4>
-                        <ul className="space-y-2 w-full px-4">
-                          <li className="flex justify-between w-full">
-                            <span>Product A</span>
-                            <span>$50.00 x 1</span>
-                          </li>
-                          <li className="flex justify-between w-full">
-                            <span>Product B</span>
-                            <span>$75.00 x 1</span>
-                          </li>
-                          <li className="flex justify-between w-full">
-                            <span>Product C</span>
-                            <span>$31.00 x 1</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <TableRow>
+                  <TableCell className="font-medium">ORD001</TableCell>
+                  <TableCell>John Doe</TableCell>
+                  <TableCell>Pending</TableCell>
+                  <TableCell>3</TableCell>
+                  <TableCell>$156.00</TableCell>
+                  <TableCell>2024-03-20</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
