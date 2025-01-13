@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, ArrowLeft } from "lucide-react";
+import { Plus, Search, ArrowLeft, ChevronDown } from "lucide-react";
 import NewOrderForm from "@/components/orders/NewOrderForm";
 import { useState } from "react";
 import {
@@ -95,45 +95,39 @@ const Orders = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="order-1">
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        <AccordionTrigger className="hover:no-underline">
-                          ORD001
-                        </AccordionTrigger>
-                      </TableCell>
-                      <TableCell>John Doe</TableCell>
-                      <TableCell className={cn(getStatusColor("pending"))}>
-                        Pending
-                      </TableCell>
-                      <TableCell>3</TableCell>
-                      <TableCell>$156.00</TableCell>
-                      <TableCell>2024-03-20</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell colSpan={6} className="p-0">
-                        <AccordionContent>
-                          <div className="px-4 py-2 bg-muted/50">
-                            <h4 className="font-semibold mb-2">Order Items:</h4>
-                            <ul className="space-y-2">
-                              <li className="flex justify-between">
-                                <span>Product A</span>
-                                <span>$50.00 x 1</span>
-                              </li>
-                              <li className="flex justify-between">
-                                <span>Product B</span>
-                                <span>$75.00 x 1</span>
-                              </li>
-                              <li className="flex justify-between">
-                                <span>Product C</span>
-                                <span>$31.00 x 1</span>
-                              </li>
-                            </ul>
-                          </div>
-                        </AccordionContent>
-                      </TableCell>
-                    </TableRow>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="order-1" className="border-none">
+                    <AccordionTrigger className="hover:no-underline w-full">
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell className="font-medium">ORD001</TableCell>
+                        <TableCell>John Doe</TableCell>
+                        <TableCell className={cn(getStatusColor("pending"))}>
+                          Pending
+                        </TableCell>
+                        <TableCell>3</TableCell>
+                        <TableCell>$156.00</TableCell>
+                        <TableCell>2024-03-20</TableCell>
+                      </TableRow>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="px-4 py-2 bg-muted/50">
+                        <h4 className="font-semibold mb-2">Order Items:</h4>
+                        <ul className="space-y-2">
+                          <li className="flex justify-between">
+                            <span>Product A</span>
+                            <span>$50.00 x 1</span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span>Product B</span>
+                            <span>$75.00 x 1</span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span>Product C</span>
+                            <span>$31.00 x 1</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </TableBody>
