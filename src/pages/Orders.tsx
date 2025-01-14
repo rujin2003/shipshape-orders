@@ -14,69 +14,42 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 
-interface Item {
-  id: number;
-  name: string;
-  size?: string;
-  color?: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: number;
-  customerId: number;
-  customerName: string;
-  orderDate: string;
-  shipmentDue: string;
-  shipmentAddress: string;
-  orderStatus: "pending" | "shipped" | "shipped but due";
-  items: Item[];
-  totalPrice: number;
-  noOfItems: number;
-}
-
-// Updated mock data to match the new interface
-const mockOrders: Order[] = [
+// Mock data - replace with actual data fetching
+const mockOrders = [
   {
-    id: 1,
-    customerId: 1,
+    id: "ORD001",
     customerName: "John Doe",
     orderDate: "2024-03-20",
-    shipmentDue: "2024-03-25",
-    shipmentAddress: "123 Main St, City, State",
-    orderStatus: "pending",
+    status: "pending",
     items: [
-      { id: 1, name: "Item 1", size: "M", color: "Blue", quantity: 2, price: 50 },
-      { id: 2, name: "Item 2", size: "L", color: "Red", quantity: 1, price: 30 },
+      { id: 1, name: "Item 1", quantity: 2, price: 50 },
+      { id: 2, name: "Item 2", quantity: 1, price: 30 },
     ],
-    totalPrice: 130,
-    noOfItems: 3,
+    address: "123 Main St, City, State",
   },
   {
-    id: 2,
-    customerId: 2,
+    id: "ORD002",
     customerName: "Jane Smith",
     orderDate: "2024-03-21",
-    shipmentDue: "2024-03-26",
-    shipmentAddress: "456 Oak St, City, State",
-    orderStatus: "shipped but due",
+    status: "shipped but due",
     items: [
-      { id: 3, name: "Item 3", size: "S", color: "Green", quantity: 3, price: 40 },
+      { id: 3, name: "Item 3", quantity: 3, price: 40 },
     ],
-    totalPrice: 120,
-    noOfItems: 3,
+    dueItems: [
+      { id: 4, name: "Item 4", quantity: 2, price: 25 },
+    ],
+    address: "456 Oak St, City, State",
   },
 ];
 
 const Orders = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleOrderClick = (orderId: number) => {
+  const handleOrderClick = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
     setSelectedItems([]);
   };
@@ -89,7 +62,7 @@ const Orders = () => {
     );
   };
 
-  const handleCreateShipment = (order: Order) => {
+  const handleCreateShipment = (orderId: string) => {
     if (selectedItems.length === 0) {
       toast({
         title: "Error",
@@ -100,9 +73,9 @@ const Orders = () => {
     }
     navigate(`/shipments/new`, { 
       state: { 
-        orderId: order.id, 
+        orderId, 
         selectedItems,
-        orderDetails: order
+        orderDetails: mockOrders.find(order => order.id === orderId)
       } 
     });
   };
@@ -127,13 +100,10 @@ const Orders = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Order ID</TableHead>
-              <TableHead className="w-[150px]">Customer</TableHead>
-              <TableHead className="w-[120px]">Order Date</TableHead>
-              <TableHead className="w-[120px]">Due Date</TableHead>
-              <TableHead className="w-[120px]">Status</TableHead>
-              <TableHead className="w-[100px]">Items</TableHead>
-              <TableHead className="w-[100px]">Total</TableHead>
+              <TableHead className="w-[200px]">Order ID</TableHead>
+              <TableHead className="w-[200px]">Customer</TableHead>
+              <TableHead className="w-[200px]">Date</TableHead>
+              <TableHead className="w-[200px]">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,32 +117,25 @@ const Orders = () => {
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>{order.customerName}</TableCell>
                   <TableCell>{order.orderDate}</TableCell>
-                  <TableCell>{order.shipmentDue}</TableCell>
-                  <TableCell>{order.orderStatus}</TableCell>
-                  <TableCell>{order.noOfItems}</TableCell>
-                  <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                  <TableCell>{order.status}</TableCell>
                 </TableRow>
                 {expandedOrder === order.id && (
                   <TableRow>
-                    <TableCell colSpan={7} className="p-0">
+                    <TableCell colSpan={4} className="p-0">
                       <Card className="m-2 bg-muted/50">
                         <CardContent className="p-4">
                           <div className="space-y-4">
                             <div>
                               <h3 className="font-semibold mb-2">Delivery Address</h3>
-                              <p>{order.shipmentAddress}</p>
+                              <p>{order.address}</p>
                             </div>
                             <div>
                               <h3 className="font-semibold mb-2">Items</h3>
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    {order.orderStatus === "pending" && (
-                                      <TableHead className="w-[50px]"></TableHead>
-                                    )}
+                                    {order.status === "pending" && <TableHead className="w-[50px]"></TableHead>}
                                     <TableHead>Item</TableHead>
-                                    <TableHead>Size</TableHead>
-                                    <TableHead>Color</TableHead>
                                     <TableHead>Quantity</TableHead>
                                     <TableHead>Price</TableHead>
                                   </TableRow>
@@ -180,7 +143,7 @@ const Orders = () => {
                                 <TableBody>
                                   {order.items.map((item) => (
                                     <TableRow key={item.id}>
-                                      {order.orderStatus === "pending" && (
+                                      {order.status === "pending" && (
                                         <TableCell>
                                           <input
                                             type="checkbox"
@@ -191,19 +154,24 @@ const Orders = () => {
                                         </TableCell>
                                       )}
                                       <TableCell>{item.name}</TableCell>
-                                      <TableCell>{item.size || '-'}</TableCell>
-                                      <TableCell>{item.color || '-'}</TableCell>
                                       <TableCell>{item.quantity}</TableCell>
-                                      <TableCell>${item.price.toFixed(2)}</TableCell>
+                                      <TableCell>${item.price}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                  {order.dueItems && order.dueItems.map((item) => (
+                                    <TableRow key={item.id}>
+                                      <TableCell>{item.name} (Due)</TableCell>
+                                      <TableCell>{item.quantity}</TableCell>
+                                      <TableCell>${item.price}</TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
                               </Table>
                             </div>
-                            {order.orderStatus === "pending" && (
+                            {order.status === "pending" && (
                               <div className="flex justify-end">
                                 <Button
-                                  onClick={() => handleCreateShipment(order)}
+                                  onClick={() => handleCreateShipment(order.id)}
                                 >
                                   <Package className="mr-2 h-4 w-4" />
                                   Create Shipment
