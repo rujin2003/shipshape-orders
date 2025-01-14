@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Package, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data - replace with actual data fetching
 const mockOrders = [
@@ -42,30 +42,55 @@ const mockOrders = [
   },
 ];
 
+interface ShipmentItem {
+  id: number;
+  quantity: number;
+  color?: string;
+}
+
 const Orders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [shipmentItems, setShipmentItems] = useState<ShipmentItem[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleOrderClick = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
     setSelectedItems([]);
+    setShipmentItems([]);
   };
 
-  const handleItemSelect = (itemId: number) => {
-    setSelectedItems(
-      selectedItems.includes(itemId)
-        ? selectedItems.filter((id) => id !== itemId)
-        : [...selectedItems, itemId]
-    );
+  const handleItemSelect = (itemId: number, defaultQuantity: number) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter((id) => id !== itemId));
+      setShipmentItems(shipmentItems.filter((item) => item.id !== itemId));
+    } else {
+      setSelectedItems([...selectedItems, itemId]);
+      setShipmentItems([...shipmentItems, { id: itemId, quantity: defaultQuantity }]);
+    }
   };
 
   const handleCreateOrder = () => {
-    // Generate a unique order ID (you might want to handle this differently in production)
     const orderId = `ORD${Date.now()}`;
     navigate(`/orders/new`, { state: { orderId } });
+  };
+
+  const updateShipmentItemQuantity = (itemId: number, quantity: number) => {
+    setShipmentItems(
+      shipmentItems.map((item) =>
+        item.id === itemId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const updateShipmentItemColor = (itemId: number, color: string) => {
+    setShipmentItems(
+      shipmentItems.map((item) =>
+        item.id === itemId ? { ...item, color } : item
+      )
+    );
   };
 
   const handleCreateShipment = (orderId: string) => {
@@ -77,12 +102,27 @@ const Orders = () => {
       });
       return;
     }
-    navigate(`/shipments/new`, { 
-      state: { 
-        orderId, 
+
+    const order = mockOrders.find((order) => order.id === orderId);
+    const itemsToShip = shipmentItems.map((shipItem) => {
+      const orderItem = order?.items.find((item) => item.id === shipItem.id) ||
+                       order?.dueItems?.find((item) => item.id === shipItem.id);
+      return {
+        ...orderItem,
+        quantity: shipItem.quantity,
+        color: shipItem.color,
+      };
+    });
+
+    navigate(`/shipments/new`, {
+      state: {
+        orderId,
         selectedItems,
-        orderDetails: mockOrders.find(order => order.id === orderId)
-      } 
+        orderDetails: {
+          ...order,
+          items: itemsToShip,
+        },
+      },
     });
   };
 
@@ -143,9 +183,17 @@ const Orders = () => {
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    {order.status === "pending" && <TableHead className="w-[50px]"></TableHead>}
+                                    {(order.status === "pending" || order.status === "shipped but due") && (
+                                      <TableHead className="w-[50px]"></TableHead>
+                                    )}
                                     <TableHead>Item</TableHead>
                                     <TableHead>Quantity</TableHead>
+                                    {(order.status === "pending" || order.status === "shipped but due") && (
+                                      <>
+                                        <TableHead>Ship Quantity</TableHead>
+                                        <TableHead>Color</TableHead>
+                                      </>
+                                    )}
                                     <TableHead>Price</TableHead>
                                   </TableRow>
                                 </TableHeader>
@@ -157,27 +205,83 @@ const Orders = () => {
                                           <input
                                             type="checkbox"
                                             checked={selectedItems.includes(item.id)}
-                                            onChange={() => handleItemSelect(item.id)}
+                                            onChange={() => handleItemSelect(item.id, item.quantity)}
                                             className="h-4 w-4"
                                           />
                                         </TableCell>
                                       )}
                                       <TableCell>{item.name}</TableCell>
                                       <TableCell>{item.quantity}</TableCell>
+                                      {order.status === "pending" && selectedItems.includes(item.id) && (
+                                        <>
+                                          <TableCell>
+                                            <Input
+                                              type="number"
+                                              min="1"
+                                              max={item.quantity}
+                                              value={shipmentItems.find(si => si.id === item.id)?.quantity || item.quantity}
+                                              onChange={(e) => updateShipmentItemQuantity(item.id, parseInt(e.target.value))}
+                                              className="w-20"
+                                            />
+                                          </TableCell>
+                                          <TableCell>
+                                            <Input
+                                              type="text"
+                                              placeholder="Color"
+                                              value={shipmentItems.find(si => si.id === item.id)?.color || ""}
+                                              onChange={(e) => updateShipmentItemColor(item.id, e.target.value)}
+                                              className="w-32"
+                                            />
+                                          </TableCell>
+                                        </>
+                                      )}
                                       <TableCell>${item.price}</TableCell>
                                     </TableRow>
                                   ))}
                                   {order.dueItems && order.dueItems.map((item) => (
                                     <TableRow key={item.id}>
+                                      {order.status === "shipped but due" && (
+                                        <TableCell>
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedItems.includes(item.id)}
+                                            onChange={() => handleItemSelect(item.id, item.quantity)}
+                                            className="h-4 w-4"
+                                          />
+                                        </TableCell>
+                                      )}
                                       <TableCell>{item.name} (Due)</TableCell>
                                       <TableCell>{item.quantity}</TableCell>
+                                      {order.status === "shipped but due" && selectedItems.includes(item.id) && (
+                                        <>
+                                          <TableCell>
+                                            <Input
+                                              type="number"
+                                              min="1"
+                                              max={item.quantity}
+                                              value={shipmentItems.find(si => si.id === item.id)?.quantity || item.quantity}
+                                              onChange={(e) => updateShipmentItemQuantity(item.id, parseInt(e.target.value))}
+                                              className="w-20"
+                                            />
+                                          </TableCell>
+                                          <TableCell>
+                                            <Input
+                                              type="text"
+                                              placeholder="Color"
+                                              value={shipmentItems.find(si => si.id === item.id)?.color || ""}
+                                              onChange={(e) => updateShipmentItemColor(item.id, e.target.value)}
+                                              className="w-32"
+                                            />
+                                          </TableCell>
+                                        </>
+                                      )}
                                       <TableCell>${item.price}</TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
                               </Table>
                             </div>
-                            {order.status === "pending" && (
+                            {(order.status === "pending" || (order.status === "shipped but due" && order.dueItems?.length > 0)) && (
                               <div className="flex justify-end">
                                 <Button
                                   onClick={() => handleCreateShipment(order.id)}
