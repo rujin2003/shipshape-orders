@@ -8,29 +8,63 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NewCustomerForm from "@/components/customers/NewCustomerForm";
 import EditCustomerForm from "@/components/customers/EditCustomerForm";
+import { toast } from "sonner";
 
 const Customers = () => {
   const navigate = useNavigate();
   const [showNewCustomer, setShowNewCustomer] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<null | {
-    name: string;
-    email: string;
-    phone: string;
-    country: string;
-    address: string;
-  }>(null);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [customersData, setCustomersData] = useState([]);
+  const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
 
-  const handleEdit = (customer: {
-    name: string;
-    email: string;
-    phone: string;
-    country: string;
-    address: string;
-  }) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const customersResponse = await fetch("http://localhost:8080/customers", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${AUTH_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!customersResponse.ok) throw new Error(`Error: ${customersResponse.status}`);
+        const customers = await customersResponse.json();
+
+        const updatedCustomers = await Promise.all(
+          customers.map(async (customer) => {
+            const orderRes = await fetch(`http://localhost:8080/orders/count/${customer.name}`, {
+              headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
+            });
+            const orderData = await orderRes.json();
+
+            const salesRes = await fetch(`http://localhost:8080/totalSales/${customer.name}`, {
+              headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
+            });
+            const salesData = await salesRes.json();
+
+            return {
+              ...customer,
+              order_count: orderData.order_count,
+              total_sales: salesData.total_sales,
+            };
+          })
+        );
+
+        setCustomersData(updatedCustomers);
+      } catch (error) {
+        toast.error("Failed to fetch customer data");
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleEdit = (customer) => {
     setEditingCustomer(customer);
     setShowNewCustomer(false);
   };
@@ -39,7 +73,7 @@ const Customers = () => {
     setEditingCustomer(null);
   };
 
-  const handleRowClick = (customerId: string) => {
+  const handleRowClick = (customerId) => {
     navigate(`/customers/${customerId}`);
   };
 
@@ -53,57 +87,55 @@ const Customers = () => {
       </div>
 
       {showNewCustomer ? (
-        <NewCustomerForm />
-      ) : editingCustomer ? (
-        <EditCustomerForm customer={editingCustomer} onCancel={handleCancelEdit} />
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow 
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleRowClick("1")}
+  <NewCustomerForm onCancel={() => setShowNewCustomer(false)} />
+) : editingCustomer ? (
+  <EditCustomerForm customer={editingCustomer} onCancel={handleCancelEdit} />
+) : (
+  <div className="rounded-md border">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>Phone</TableHead>
+          <TableHead>Country</TableHead>
+          <TableHead>Orders</TableHead>
+          <TableHead>Total Spent</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {customersData.map((customer) => (
+          <TableRow
+            key={customer.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleRowClick(customer.id)}
+          >
+            <TableCell className="font-medium">{customer.name}</TableCell>
+            <TableCell>{customer.email}</TableCell>
+            <TableCell>{customer.phone}</TableCell>
+            <TableCell>{customer.country}</TableCell>
+            <TableCell>{customer.order_count}</TableCell>
+            <TableCell>${customer.total_sales}</TableCell>
+            <TableCell>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(customer);
+                }}
               >
-                <TableCell className="font-medium">John Doe</TableCell>
-                <TableCell>john@example.com</TableCell>
-                <TableCell>+1234567890</TableCell>
-                <TableCell>United States</TableCell>
-                <TableCell>5</TableCell>
-                <TableCell>$543.00</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit({
-                        name: "John Doe",
-                        email: "john@example.com",
-                        phone: "+1234567890",
-                        country: "United States",
-                        address: "123 Main St, City, State",
-                      });
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+)}
+
     </div>
   );
 };

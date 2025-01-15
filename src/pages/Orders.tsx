@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,38 +9,55 @@ import OrderDetails from "@/components/orders/OrderDetails";
 import EditOrderModal from "@/components/orders/EditOrderModal";
 import { Order, OrderItem } from "@/types/order";
 
-// Mock data - replace with actual data fetching
-const mockOrders: Order[] = [
-  {
-    id: "ORD001",
-    customerName: "John Doe",
-    orderDate: "2024-03-20",
-    status: "pending",
-    items: [
-      { id: 1, name: "Item 1", quantity: 2, price: 50 },
-      { id: 2, name: "Item 2", quantity: 1, price: 30 },
-    ],
-    address: "123 Main St, City, State",
-  },
-  {
-    id: "ORD002",
-    customerName: "Jane Smith",
-    orderDate: "2024-03-21",
-    status: "shipped but due",
-    items: [{ id: 3, name: "Item 3", quantity: 3, price: 40 }],
-    dueItems: [{ id: 4, name: "Item 4", quantity: 2, price: 25 }],
-    address: "456 Oak St, City, State",
-  },
-];
-
 const Orders = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [editedItems, setEditedItems] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Fetch orders from API
+  useEffect(() => {
+    fetch("http://localhost:8080/orders", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        const mappedOrders: Order[] = data.map((order: any) => ({
+          id: `ORD${order.id.toString().padStart(3, '0')}`,  // Convert numeric ID to string
+          customerName: order.customer_name,
+          orderDate: new Date(order.order_date).toLocaleDateString(),
+          status: order.order_status,
+          items: order.items.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          address: order.shipment_address,
+        }));
+        setOrders(mappedOrders);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching orders:", err);
+        setError("Failed to load orders. Please try again later.");
+        setLoading(false);
+      });
+  }, []);
 
   const handleOrderClick = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -61,7 +78,7 @@ const Orders = () => {
   };
 
   const handleEditOrder = (orderId: string) => {
-    const order = mockOrders.find((o) => o.id === orderId);
+    const order = orders.find((o) => o.id === orderId);
     if (order) {
       setEditedItems([...order.items]);
       setEditingOrder(orderId);
@@ -92,7 +109,7 @@ const Orders = () => {
       return;
     }
 
-    const order = mockOrders.find((order) => order.id === orderId);
+    const order = orders.find((order) => order.id === orderId);
     if (!order) return;
 
     navigate(`/shipments/new`, {
@@ -103,6 +120,14 @@ const Orders = () => {
       },
     });
   };
+
+  if (loading) {
+    return <p>Loading orders...</p>;
+  }
+
+  if (error) {
+    return <p style={{ color: "red" }}>{error}</p>;
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -125,14 +150,14 @@ const Orders = () => {
 
       <div className="rounded-md border">
         <OrderList
-          orders={mockOrders}
+          orders={orders}
           expandedOrder={expandedOrder}
           onOrderClick={handleOrderClick}
           onEditOrder={handleEditOrder}
         />
         {expandedOrder && (
           <OrderDetails
-            order={mockOrders.find((o) => o.id === expandedOrder)!}
+            order={orders.find((o) => o.id === expandedOrder)!}
             selectedItems={selectedItems}
             onItemSelect={handleItemSelect}
             onCreateShipment={handleCreateShipment}
@@ -143,7 +168,7 @@ const Orders = () => {
       <EditOrderModal
         isOpen={editingOrder !== null}
         onClose={() => setEditingOrder(null)}
-        order={mockOrders.find((o) => o.id === editingOrder) || null}
+        order={orders.find((o) => o.id === editingOrder) || null}
         editedItems={editedItems}
         onUpdateItem={handleUpdateItem}
         onSave={handleSaveEdit}

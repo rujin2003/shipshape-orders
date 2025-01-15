@@ -23,6 +23,7 @@ const formSchema = z.object({
 
 interface EditCustomerFormProps {
   customer: {
+    id: number;
     name: string;
     email: string;
     phone: string;
@@ -33,7 +34,7 @@ interface EditCustomerFormProps {
 }
 
 const EditCustomerForm = ({ customer, onCancel }: EditCustomerFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: customer.name,
@@ -44,80 +45,34 @@ const EditCustomerForm = ({ customer, onCancel }: EditCustomerFormProps) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    toast.success("Customer updated successfully!");
-    onCancel();
+  const onSubmit = async (values) => {
+    try {
+      const response = await fetch(`http://localhost:8080/customers/${customer.id}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) throw new Error("Failed to update customer");
+
+      toast.success("Customer updated successfully!");
+      onCancel();
+    } catch (error) {
+      toast.error("Error updating customer");
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="+1234567890" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="john@example.com" type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Country</FormLabel>
-              <FormControl>
-                <Input placeholder="United States" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Address</FormLabel>
-              <FormControl>
-                <Input placeholder="123 Main St, City, State" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Input placeholder="Name" {...form.register("name")} />
+        <Input placeholder="Phone" {...form.register("phone")} />
+        <Input placeholder="Email" type="email" {...form.register("email")} />
+        <Input placeholder="Country" {...form.register("country")} />
+        <Input placeholder="Address" {...form.register("address")} />
         <div className="flex gap-4">
           <Button type="submit" className="flex-1">Update Customer</Button>
           <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>

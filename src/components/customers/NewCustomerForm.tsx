@@ -13,6 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+interface NewCustomerFormProps {
+  onCancel: () => void;
+}
+
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(10, "Phone number must be at least 10 characters"),
@@ -21,7 +25,7 @@ const formSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
 });
 
-const NewCustomerForm = () => {
+const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,10 +37,25 @@ const NewCustomerForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    toast.success("Customer added successfully!");
-    form.reset();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch("http://localhost:8080/customers", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) throw new Error("Failed to add customer");
+
+      toast.success("Customer added successfully!");
+      form.reset();
+      onCancel();
+    } catch (error) {
+      toast.error("Error adding customer");
+    }
   };
 
   return (
@@ -101,13 +120,18 @@ const NewCustomerForm = () => {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main St, City, State" {...field} />
+                <Input placeholder="123 Main St" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Add Customer</Button>
+        <div className="flex gap-4">
+          <Button type="submit" className="flex-1">Add Customer</Button>
+          <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
       </form>
     </Form>
   );

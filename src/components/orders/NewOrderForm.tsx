@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,13 +17,16 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for customers - replace with actual data later
-const customers = [
-  { id: "1", name: "John Doe" },
-  { id: "2", name: "Jane Smith" },
-  { id: "3", name: "Bob Johnson" },
-];
+interface Customer {
+  id: number;
+  name: string;
+  number: number;
+  email: string;
+  country: string;
+  address: string;
+}
 
 interface OrderItem {
   name: string;
@@ -48,17 +51,44 @@ interface NewOrderFormProps {
 
 const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
   const [items, setItems] = useState<OrderItem[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { toast } = useToast();
+
   const form = useForm<OrderFormData>({
     defaultValues: {
       orderId: orderId,
     },
   });
 
+  // Fetch customers from the API
+  useEffect(() => {
+    fetch("http://localhost:8080/customers", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        setCustomers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching customers:", err);
+        setError("Failed to load customers. Please try again.");
+        setLoading(false);
+      });
+  }, []);
+
   const addItem = () => {
-    setItems([
-      ...items,
-      { name: "", size: "", color: "", price: 0, quantity: 1 },
-    ]);
+    setItems([...items, { name: "", size: "", color: "", price: 0, quantity: 1 }]);
   };
 
   const updateItem = (index: number, field: keyof OrderItem, value: any) => {
@@ -71,19 +101,73 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
     setItems(items.filter((_, i) => i !== index));
   };
 
+  // Dynamically calculate total price
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
-  const onSubmit = (data: OrderFormData) => {
-    const orderData = {
-      ...data,
-      items,
-      totalPrice: calculateTotal(),
-      numberOfItems: items.length,
+  const onSubmit = async (data: OrderFormData) => {
+    const selectedCustomer = customers.find((c) => c.id === parseInt(data.customerId));
+
+    const orderPayload = {
+      id: parseInt(data.orderId.replace("ORD", "")),
+      customer_id: parseInt(data.customerId),
+      customer_name: selectedCustomer?.name || "",
+      order_date: data.orderDate,
+      shipment_due: data.finalDate,
+      shipment_address: data.address,
+      order_status: "pending",
+      items: items.map((item, index) => ({
+        id: index + 1,
+        name: item.name,
+        size: item.size,
+        color: item.color,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      total_price: calculateTotal(),
+      no_of_items: items.length,
     };
-    console.log("Order submitted:", orderData);
+
+    try {
+      const response = await fetch("http://localhost:8080/orders", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      toast({
+        title: "Order Created",
+        description: "The new order has been successfully created.",
+      });
+
+      form.reset();
+      setItems([]);
+
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create the order. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return <p>Loading customers...</p>;
+  }
+
+  if (error) {
+    return <p style={{ color: "red" }}>{error}</p>;
+  }
 
   return (
     <Form {...form}>
@@ -113,10 +197,7 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Customer</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select customer" />
@@ -124,51 +205,12 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
                       </FormControl>
                       <SelectContent>
                         {customers.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
+                          <SelectItem key={customer.id} value={customer.id.toString()}>
+                            {customer.name} - {customer.country}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="orderDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="finalDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Final Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Delivery Address" {...field} />
-                    </FormControl>
                   </FormItem>
                 )}
               />
@@ -185,51 +227,12 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
               {items.map((item, index) => (
                 <Card key={index}>
                   <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Input
-                        placeholder="Item name"
-                        value={item.name}
-                        onChange={(e) =>
-                          updateItem(index, "name", e.target.value)
-                        }
-                      />
-                      <Input
-                        placeholder="Size"
-                        value={item.size}
-                        onChange={(e) =>
-                          updateItem(index, "size", e.target.value)
-                        }
-                      />
-                      <Input
-                        placeholder="Color"
-                        value={item.color}
-                        onChange={(e) =>
-                          updateItem(index, "color", e.target.value)
-                        }
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price"
-                        value={item.price}
-                        onChange={(e) =>
-                          updateItem(index, "price", parseFloat(e.target.value))
-                        }
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Quantity"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateItem(index, "quantity", parseInt(e.target.value))
-                        }
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => removeItem(index)}
-                      >
-                        Remove
-                      </Button>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <Input placeholder="Item Name" value={item.name} onChange={(e) => updateItem(index, "name", e.target.value)} />
+                      <Input placeholder="Size" value={item.size} onChange={(e) => updateItem(index, "size", e.target.value)} />
+                      <Input placeholder="Color" value={item.color} onChange={(e) => updateItem(index, "color", e.target.value)} />
+                      <Input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(index, "price", parseFloat(e.target.value))} />
+                      <Input type="number" placeholder="Quantity" value={item.quantity} onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value))} />
                     </div>
                   </CardContent>
                 </Card>
@@ -237,14 +240,7 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
             </div>
 
             <div className="flex justify-between items-center pt-4">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Items: {items.length}
-                </p>
-                <p className="text-lg font-semibold">
-                  Total Price: ${calculateTotal().toFixed(2)}
-                </p>
-              </div>
+              <p className="text-lg font-semibold">Total Price: ${calculateTotal().toFixed(2)}</p>
               <Button type="submit">Create Order</Button>
             </div>
           </CardContent>
