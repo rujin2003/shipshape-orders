@@ -10,15 +10,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Package, Search } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Shipments = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleCreateShipment = () => {
+    navigate("/shipments/create");
+  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Shipments</h2>
-        <Button>
+        <Button onClick={handleCreateShipment}>
           <Package className="mr-2 h-4 w-4" /> Create Shipment
         </Button>
       </div>
