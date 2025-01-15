@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Mock data - replace with actual data fetching
 const mockOrders = [
@@ -60,6 +61,7 @@ const CreateShipment = () => {
   const [shipmentItems, setShipmentItems] = useState<ShipmentItem[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const order = mockOrders.find((o) => o.id === selectedOrder);
 
@@ -137,18 +139,18 @@ const CreateShipment = () => {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Create Shipment</h2>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-[#F1F1F1]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#1A1F2C]">Create Shipment</h2>
       </div>
 
       <div className="space-y-4">
         <div className="flex flex-col space-y-2">
-          <label htmlFor="order-select" className="text-sm font-medium">
+          <label htmlFor="order-select" className="text-sm font-medium text-[#333333]">
             Select Order
           </label>
           <Select onValueChange={handleOrderSelect} value={selectedOrder || undefined}>
-            <SelectTrigger id="order-select">
+            <SelectTrigger id="order-select" className="bg-white">
               <SelectValue placeholder="Select an order" />
             </SelectTrigger>
             <SelectContent>
@@ -162,88 +164,95 @@ const CreateShipment = () => {
         </div>
 
         {order && (
-          <Card>
-            <CardContent className="p-6">
+          <Card className="border-[#D6BCFA] shadow-sm">
+            <CardContent className="p-4 md:p-6">
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold">Order Details</h3>
-                  <p>Customer: {order.customerName}</p>
-                  <p>Address: {order.address}</p>
-                  <p>Order Date: {order.orderDate}</p>
-                  <p>Status: {order.status}</p>
+                <div className="bg-white p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-[#1A1F2C] mb-2">Order Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[#333333]">
+                    <p>Customer: {order.customerName}</p>
+                    <p>Address: {order.address}</p>
+                    <p>Order Date: {order.orderDate}</p>
+                    <p>Status: {order.status}</p>
+                  </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Select Items</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px]"></TableHead>
-                        <TableHead>Item</TableHead>
-                        <TableHead>Available Quantity</TableHead>
-                        <TableHead>Ship Quantity</TableHead>
-                        <TableHead>Color</TableHead>
-                        <TableHead>Price</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...(order.items || []), ...(order.dueItems || [])].map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>
-                            <input
-                              type="checkbox"
-                              checked={selectedItems.includes(item.id)}
-                              onChange={() => handleItemSelect(item.id, item.quantity)}
-                              className="h-4 w-4"
-                            />
-                          </TableCell>
-                          <TableCell>{item.name}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell>
-                            {selectedItems.includes(item.id) && (
-                              <Input
-                                type="number"
-                                min="1"
-                                max={item.quantity}
-                                value={
-                                  shipmentItems.find((si) => si.id === item.id)
-                                    ?.quantity || item.quantity
-                                }
-                                onChange={(e) =>
-                                  updateShipmentItemQuantity(
-                                    item.id,
-                                    parseInt(e.target.value)
-                                  )
-                                }
-                                className="w-20"
-                              />
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {selectedItems.includes(item.id) && (
-                              <Input
-                                type="text"
-                                placeholder="Color"
-                                value={
-                                  shipmentItems.find((si) => si.id === item.id)
-                                    ?.color || ""
-                                }
-                                onChange={(e) =>
-                                  updateShipmentItemColor(item.id, e.target.value)
-                                }
-                                className="w-32"
-                              />
-                            )}
-                          </TableCell>
-                          <TableCell>${item.price}</TableCell>
+                  <h3 className="text-lg font-semibold text-[#1A1F2C] mb-2">Select Items</h3>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-[#9b87f5] text-white">
+                          <TableHead className="w-[50px]"></TableHead>
+                          <TableHead>Item</TableHead>
+                          <TableHead>Available Quantity</TableHead>
+                          <TableHead>Ship Quantity</TableHead>
+                          <TableHead>Color</TableHead>
+                          <TableHead>Price</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {[...(order.items || []), ...(order.dueItems || [])].map((item) => (
+                          <TableRow key={item.id} className="hover:bg-[#F2FCE2]">
+                            <TableCell>
+                              <input
+                                type="checkbox"
+                                checked={selectedItems.includes(item.id)}
+                                onChange={() => handleItemSelect(item.id, item.quantity)}
+                                className="h-4 w-4 accent-[#9b87f5]"
+                              />
+                            </TableCell>
+                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>
+                              {selectedItems.includes(item.id) && (
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max={item.quantity}
+                                  value={
+                                    shipmentItems.find((si) => si.id === item.id)
+                                      ?.quantity || item.quantity
+                                  }
+                                  onChange={(e) =>
+                                    updateShipmentItemQuantity(
+                                      item.id,
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="w-20 bg-white"
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {selectedItems.includes(item.id) && (
+                                <Input
+                                  type="text"
+                                  placeholder="Color"
+                                  value={
+                                    shipmentItems.find((si) => si.id === item.id)
+                                      ?.color || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateShipmentItemColor(item.id, e.target.value)
+                                  }
+                                  className="w-32 bg-white"
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell>${item.price}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button onClick={handleCreateShipment}>
+                <div className="flex justify-end mt-6">
+                  <Button 
+                    onClick={handleCreateShipment}
+                    className="bg-[#9b87f5] hover:bg-[#7a63f1] text-white"
+                  >
                     Create Shipment
                   </Button>
                 </div>
