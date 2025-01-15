@@ -21,9 +21,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex min-h-screen bg-background">
+        <div className="flex h-screen">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 w-full ml-0 md:ml-64">
+          <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/orders" element={<Orders />} />
