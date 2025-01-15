@@ -22,12 +22,11 @@ const Orders = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch orders from API
   useEffect(() => {
     fetch("http://localhost:8080/orders", {
       method: "GET",
       headers: {
-        "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+        Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
         "Content-Type": "application/json",
       },
     })
@@ -37,7 +36,8 @@ const Orders = () => {
       })
       .then((data) => {
         const mappedOrders: Order[] = data.map((order: any) => ({
-          id: `ORD${order.id.toString().padStart(3, '0')}`,  // Convert numeric ID to string
+          id: order.id.toString(),
+          originalId: order.id,
           customerName: order.customer_name,
           orderDate: new Date(order.order_date).toLocaleDateString(),
           status: order.order_status,
@@ -65,16 +65,13 @@ const Orders = () => {
   };
 
   const handleItemSelect = (itemId: number) => {
-    setSelectedItems(
-      selectedItems.includes(itemId)
-        ? selectedItems.filter((id) => id !== itemId)
-        : [...selectedItems, itemId]
+    setSelectedItems((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
     );
   };
 
   const handleCreateOrder = () => {
-    const orderId = `ORD${Date.now()}`;
-    navigate(`/orders/new`, { state: { orderId } });
+    navigate(`/orders/new`);
   };
 
   const handleEditOrder = (orderId: string) => {
@@ -86,9 +83,9 @@ const Orders = () => {
   };
 
   const handleUpdateItem = (index: number, field: string, value: any) => {
-    const newItems = [...editedItems];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setEditedItems(newItems);
+    const updatedItems = [...editedItems];
+    updatedItems[index] = { ...updatedItems[index], [field]: value };
+    setEditedItems(updatedItems);
   };
 
   const handleSaveEdit = () => {
@@ -99,11 +96,55 @@ const Orders = () => {
     setEditingOrder(null);
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    try {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) {
+        toast({
+          title: "Error",
+          description: "Order not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      const response = await fetch(`http://localhost:8080/orders/${order.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) throw new Error(`Failed to delete order with ID: ${order.id}`);
+  
+      toast({
+        title: "Order Deleted",
+        description: "The order has been successfully deleted.",
+      });
+  
+      // Update state
+      setOrders((prevOrders) => prevOrders.filter((o) => o.id !== orderId));
+  
+      // Reset expandedOrder if the deleted order was expanded
+      if (expandedOrder === orderId) {
+        setExpandedOrder(null);
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the order. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   const handleCreateShipment = (orderId: string) => {
     if (selectedItems.length === 0) {
       toast({
         title: "Error",
-        description: "Please select at least one item to ship",
+        description: "Please select at least one item to ship.",
         variant: "destructive",
       });
       return;
@@ -121,20 +162,16 @@ const Orders = () => {
     });
   };
 
-  if (loading) {
-    return <p>Loading orders...</p>;
-  }
-
-  if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
-  }
+  if (loading) return <p>Loading orders...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
-        <Button onClick={handleCreateOrder}>
-          <Plus className="mr-2 h-4 w-4" /> Create Order
+        <Button onClick={handleCreateOrder} variant="default" className="rounded-lg bg-blue-500 text-white">
+          <Plus className="mr-2 h-4 w-4" />
+          Create Order
         </Button>
       </div>
 
@@ -154,6 +191,10 @@ const Orders = () => {
           expandedOrder={expandedOrder}
           onOrderClick={handleOrderClick}
           onEditOrder={handleEditOrder}
+          selectedItems={selectedItems}
+          onItemSelect={handleItemSelect}
+          onCreateShipment={handleCreateShipment}
+          onDeleteOrder={handleDeleteOrder}
         />
         {expandedOrder && (
           <OrderDetails
@@ -161,6 +202,7 @@ const Orders = () => {
             selectedItems={selectedItems}
             onItemSelect={handleItemSelect}
             onCreateShipment={handleCreateShipment}
+            onDeleteOrder={handleDeleteOrder}
           />
         )}
       </div>
