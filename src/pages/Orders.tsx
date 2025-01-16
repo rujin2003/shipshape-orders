@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import OrderList from "@/components/orders/OrderList";
 import OrderDetails from "@/components/orders/OrderDetails";
 import EditOrderModal from "@/components/orders/EditOrderModal";
@@ -162,8 +163,22 @@ const Orders = () => {
     });
   };
 
-  if (loading) return <p>Loading orders...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <p className="text-muted-foreground">Loading orders...</p>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex justify-end p-4">
+      <Alert variant="destructive" className="max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="ml-2">
+          {error}. Please try again later.
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
