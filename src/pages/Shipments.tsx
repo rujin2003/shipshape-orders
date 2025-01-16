@@ -106,11 +106,7 @@ const Shipments = () => {
     <TableRow>
       <TableCell colSpan={5} className="text-center">
         <div className="flex items-center justify-center space-x-4">
-          <img
-            src="/shipment.png"
-            alt="No shipments found"
-            className="h-7 w-7"
-          />
+         
           <span>No shipments found.</span>
         </div>
       </TableCell>

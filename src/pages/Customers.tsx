@@ -18,6 +18,7 @@ const Customers = () => {
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [customersData, setCustomersData] = useState([]);
+  
   const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
 
   useEffect(() => {
@@ -76,6 +77,7 @@ const Customers = () => {
     navigate(`/customers/${customerId}`);
   };
 
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -115,11 +117,11 @@ const Customers = () => {
             </TableHeader>
             <TableBody>
               {customersData.map((customer) => (
-                <TableRow
-                  key={customer.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleRowClick(customer.id)}
-                >
+               <TableRow
+               key={customer.id}
+               className="cursor-pointer hover:bg-muted/50"
+               onClick={() => handleRowClick(customer.id)} 
+             >
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
                   <TableCell>{customer.phone}</TableCell>
