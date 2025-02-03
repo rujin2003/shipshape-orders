@@ -1,47 +1,81 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard,
+  Package,
   ShoppingCart,
   Users,
-  Package,
+  Truck,
+  LogOut
 } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { logout, userEmail } = useAuth();
 
-  const links = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/orders", label: "Orders", icon: ShoppingCart },
-    { href: "/customers", label: "Customers", icon: Users },
-    { href: "/shipments", label: "Shipments", icon: Package },
-  ];
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
-    <div className="h-screen w-64 border-r bg-white p-4">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold text-primary">Order Manager</h1>
-      </div>
-      <nav className="space-y-2">
-        {links.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                location.pathname === link.href
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {link.label}
+    <div className="pb-12 min-h-screen">
+      <div className="space-y-4 py-4">
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Dashboard
+          </h2>
+          <div className="space-y-1">
+            <Link to="/">
+              <Button
+                variant={isActive("/") ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Package className="mr-2 h-4 w-4" />
+                Overview
+              </Button>
             </Link>
-          );
-        })}
-      </nav>
+            <Link to="/orders">
+              <Button
+                variant={isActive("/orders") ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Orders
+              </Button>
+            </Link>
+            <Link to="/customers">
+              <Button
+                variant={isActive("/customers") ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Customers
+              </Button>
+            </Link>
+            <Link to="/shipments">
+              <Button
+                variant={isActive("/shipments") ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Truck className="mr-2 h-4 w-4" />
+                Shipments
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-4 left-0 right-0 px-3">
+        <div className="px-4 py-2 text-sm text-gray-500">{userEmail}</div>
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={logout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
+      </div>
     </div>
   );
 };
