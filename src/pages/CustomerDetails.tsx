@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import config from '@/config';
 
 const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
 
@@ -17,20 +18,21 @@ const CustomerDetails = () => {
   useEffect(() => {
     const fetchCustomerDetails = async () => {
       try {
-        const customerResponse = await fetch(`http://localhost:8080/customers/${id}`, {
+        
+        const customerResponse = await fetch(`${config.apiUrl}/customers/${id}`, {
           headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
         });
         if (!customerResponse.ok) throw new Error("Failed to fetch customer details");
         const customerData = await customerResponse.json();
         setCustomer(customerData);
 
-        const ordersResponse = await fetch(`http://localhost:8080/orders/history/${customerData.name}`, {
+        const ordersResponse = await fetch(`${config.apiUrl}/orders/history/${customerData.name}`, {
           headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
         });
         const ordersData = ordersResponse.ok ? await ordersResponse.json() : [];
         setOrders(ordersData || []);
 
-        const shipmentsResponse = await fetch(`http://localhost:8080/shipments/${customerData.name}`, {
+        const shipmentsResponse = await fetch(`${config.apiUrl}/shipments/${customerData.name}`, {
           headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
         });
         const shipmentsData = shipmentsResponse.ok ? await shipmentsResponse.json() : [];
@@ -48,7 +50,8 @@ const CustomerDetails = () => {
   const handleDeleteCustomer = async () => {
     if (window.confirm("Are you sure you want to delete this customer?")) {
       try {
-        const deleteResponse = await fetch(`http://localhost:8080/customers/${id}`, {
+        
+        const deleteResponse = await fetch(`${config.apiUrl}/customers/${id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${AUTH_TOKEN}`,
@@ -143,34 +146,37 @@ const CustomerDetails = () => {
           </Table>
         </div>
 
-        {/* Shipments */}
-        <div className="rounded-lg border">
-          <div className="p-6">
-            <h3 className="text-xl font-semibold">Shipments</h3>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Shipment ID</TableHead>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Tracking No.</TableHead>
-                <TableHead>Ship Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {shipments.map((shipment) => (
-                <TableRow key={shipment.id}>
-                  <TableCell className="font-medium">{shipment.id}</TableCell>
-                  <TableCell>{shipment.orderId || "N/A"}</TableCell>
-                  <TableCell>{shipment.status || "N/A"}</TableCell>
-                  <TableCell>{shipment.trackingNo || "N/A"}</TableCell>
-                  <TableCell>{shipment.shipDate || "N/A"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+       {/* Shipments */}
+<div className="rounded-lg border">
+  <div className="p-6">
+    <h3 className="text-xl font-semibold">Shipments</h3>
+  </div>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Shipment ID</TableHead>
+        <TableHead>Order ID</TableHead>
+        <TableHead>Status</TableHead>
+        <TableHead>Ship Date</TableHead>
+        <TableHead>No. of Items</TableHead> {/* New column header */}
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {shipments.map((shipment) => (
+        <TableRow key={shipment.id}>
+          <TableCell className="font-medium">{shipment.id}</TableCell>
+          <TableCell>{shipment.order_id || "N/A"}</TableCell>
+          <TableCell>{shipment.status || "N/A"}</TableCell>
+          <TableCell>{new Date(shipment.shipped_date).toLocaleDateString()}</TableCell>
+          <TableCell>
+            {shipment.items.reduce((total, item) => total + item.quantity, 0)} {/* Calculate and display total items */}
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>
+
       </div>
     </div>
   );

@@ -65,7 +65,7 @@ const OrderDetails = ({
               <table className="min-w-full bg-white border rounded-md">
                 <thead className="bg-gray-200">
                   <tr>
-                    <th className="px-4 py-2 border">Select</th>
+                
                     <th className="px-4 py-2 border">Item Name</th>
                     <th className="px-4 py-2 border">Quantity</th>
                     <th className="px-4 py-2 border">Color</th>
@@ -76,13 +76,7 @@ const OrderDetails = ({
                 <tbody>
                   {order.items.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-4 py-2 border text-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.includes(item.id)}
-                          onChange={() => onItemSelect(item.id)}
-                        />
-                      </td>
+                      
                       <td className="px-4 py-2 border">{item.name}</td>
                       <td className="px-4 py-2 border">
                         <input

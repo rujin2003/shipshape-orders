@@ -12,14 +12,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import config from '@/config';
 
 interface NewCustomerFormProps {
   onCancel: () => void;
 }
 
+// Schema with phone number as a string
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(10, "Phone number must be at least 10 characters"),
+  number: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^\d+$/, "Phone number must contain only numbers"), // Ensure only digits
   email: z.string().email("Invalid email address"),
   country: z.string().min(2, "Country must be at least 2 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
@@ -30,22 +35,30 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      phone: "",
+      number: "",
       email: "",
       country: "",
       address: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>,event) => {
+    
     try {
-      const response = await fetch("http://localhost:8080/customers", {
+      event.preventDefault();
+      // Convert phone number to an integer 
+      const customerData = {
+        ...values,
+        phone: parseInt(values.number, 10), // Convert phone to integer
+      };
+
+      const response = await fetch(`${config.apiUrl}/customers`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(customerData),
       });
 
       if (!response.ok) throw new Error("Failed to add customer");
@@ -76,12 +89,17 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="number"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="+1234567890" {...field} />
+                <Input
+                  placeholder="1234567890"
+                  {...field}
+                 
+                
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,7 +145,9 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
           )}
         />
         <div className="flex gap-4">
-          <Button type="submit" className="flex-1">Add Customer</Button>
+          <Button type="submit" className="flex-1" >
+            Add Customer
+          </Button>
           <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
             Cancel
           </Button>

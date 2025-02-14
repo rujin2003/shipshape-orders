@@ -6,7 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
-
+import { log } from "console";
+import config from '@/config';
 // Define interface for stats
 interface StatsData {
   totalSales: string;
@@ -30,15 +31,19 @@ const SalesOverview = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+       
+      
         const headers = {
           'Authorization': `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
           'Content-Type': 'application/json',
         };
 
-        const [salesRes, customersRes, pendingRes] = await Promise.all([
-          fetch("http://localhost:8080/totalSales", { method: 'GET', headers }),
-          fetch("http://localhost:8080/customer/totalCount", { method: 'GET', headers }),
-          fetch("http://localhost:8080/orders/pending-count", { method: 'GET', headers }),
+        const [salesRes, customersRes,orderRes, pendingRes] = await Promise.all([
+          fetch(`${config.apiUrl}/totalSales`, { method: 'GET', headers }),
+          fetch(`${config.apiUrl}/customer/totalCount`, { method: 'GET', headers }),
+          fetch(`${config.apiUrl}/order/totalordercount`, { method: 'GET', headers }),
+          fetch(`${config.apiUrl}/orders/pending-count`, { method: 'GET', headers }),
+          
         ]);
 
         if (!salesRes.ok || !customersRes.ok || !pendingRes.ok) {
@@ -48,10 +53,11 @@ const SalesOverview = () => {
         const salesData = await salesRes.json();         // { "total_sales": 0 }
         const customersData = await customersRes.json(); // Plain number (e.g., 2)
         const pendingData = await pendingRes.json();     // { "pending_order_count": 1 }
+        const orderData = await orderRes.json();         // { "total_order_count": 1 }
 
         setStats({
           totalSales: `$${(salesData.total_sales || 0).toLocaleString()}`,
-          totalOrders: "2",  // Dummy value for now
+          totalOrders: `${orderData.total_order_count}`,  // Dummy value for now
           totalCustomers: `${customersData || 0}`,
           pendingShipments: `${pendingData.pending_order_count || 0}`,
         });
@@ -65,7 +71,7 @@ const SalesOverview = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [stats]);
 
   // Stats configuration
   const statsConfig = [

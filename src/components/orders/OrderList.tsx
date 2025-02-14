@@ -70,7 +70,7 @@ const OrderList = ({
                   variant="ghost"
                   size="icon"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevents expanding when clicking the edit button
+                    e.stopPropagation(); 
                     onEditOrder(order.id);
                   }}
                 >

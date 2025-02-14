@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   Form,
   FormControl,
@@ -18,7 +19,7 @@ import {
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-
+import config from '@/config';
 interface Customer {
   id: number;
   name: string;
@@ -29,7 +30,7 @@ interface Customer {
 }
 
 interface OrderItem {
-  id?: number; // Optional since new items won't have an ID initially
+  id?: number;
   name: string;
   size: string;
   color: string;
@@ -38,7 +39,7 @@ interface OrderItem {
 }
 
 interface OrderFormData {
-  orderId: string;
+  orderId: number; // Updated to use number type
   customerId: string;
   orderDate: string;
   finalDate: string;
@@ -46,21 +47,18 @@ interface OrderFormData {
   items: OrderItem[];
 }
 
-interface NewOrderFormProps {
-  orderId: string;
-}
-
-const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
+const NewOrderForm = () => {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextOrderId, setNextOrderId] = useState<number | null>(null); // State to hold next order ID
 
   const { toast } = useToast();
 
   const form = useForm<OrderFormData>({
     defaultValues: {
-      orderId: orderId,
+      orderId: 0, // Temporary, will be updated after fetching latest order ID
       orderDate: "",
       finalDate: "",
       address: "",
@@ -68,8 +66,40 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
     },
   });
 
+  // Fetch latest order ID and set next order ID
   useEffect(() => {
-    fetch("http://localhost:8080/customers", {
+    const fetchLatestOrderID = async () => {
+      try {
+        
+        const response = await fetch(`${config.apiUrl}/orders/latestOrderId`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+        const data = await response.json();
+        const latestOrderID = data.latest_order_id;
+
+        // Set next order ID as latest ID + 1
+        setNextOrderId(latestOrderID + 1);
+        form.setValue("orderId", latestOrderID + 1);
+      } catch (error) {
+        console.error("Error fetching latest order ID:", error);
+        setError("Failed to fetch the latest order ID.");
+      }
+    };
+
+    fetchLatestOrderID();
+  }, []);
+
+  // Fetch customers
+  useEffect(() => {
+   
+    fetch(`${config.apiUrl}/customers`, {
       method: "GET",
       headers: {
         Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
@@ -106,10 +136,19 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
   };
 
   const onSubmit = async (data: OrderFormData) => {
+    if (nextOrderId === null) {
+      toast({
+        title: "Error",
+        description: "Order ID is not available yet. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const selectedCustomer = customers.find((c) => c.id === parseInt(data.customerId));
 
     const orderPayload = {
-      id: parseInt(data.orderId.replace("ORD", "")),
+      id: nextOrderId, // Assigning the next order ID
       customer_id: parseInt(data.customerId),
       customer_name: selectedCustomer?.name || "",
       order_date: new Date(data.orderDate).toISOString(),
@@ -126,7 +165,8 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/orders", {
+      
+      const response = await fetch(`${config.apiUrl}/orders`, {
         method: "POST",
         headers: {
           Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
@@ -146,6 +186,8 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
 
       form.reset();
       setItems([]);
+      setNextOrderId(nextOrderId + 1); 
+      form.setValue("orderId", nextOrderId + 1);
     } catch (error) {
       console.error("Error creating order:", error);
       toast({
@@ -166,10 +208,7 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 max-w-4xl mx-auto"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-4xl mx-auto">
         <Card>
           <CardHeader>
             <CardTitle>Order Details</CardTitle>
@@ -287,10 +326,8 @@ const NewOrderForm = ({ orderId }: NewOrderFormProps) => {
               ))}
             </div>
 
-            <div className="flex justify-between items-center pt-4">
-              <p>Total Price: ${calculateTotal().toFixed(2)}</p>
-              <Button type="submit">Create Order</Button>
-            </div>
+            {/* Submit Button */}
+            <Button type="submit">Create Order</Button>
           </CardContent>
         </Card>
       </form>

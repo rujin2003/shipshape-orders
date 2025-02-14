@@ -12,6 +12,7 @@ import NewCustomerForm from "@/components/customers/NewCustomerForm";
 import EditCustomerForm from "@/components/customers/EditCustomerForm";
 import { toast } from "sonner";
 import { UserPlus, Pencil } from "lucide-react";
+import config from '@/config';
 
 const Customers = () => {
   const navigate = useNavigate();
@@ -23,8 +24,10 @@ const Customers = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+
       try {
-        const customersResponse = await fetch("http://localhost:8080/customers", {
+        
+        const customersResponse = await fetch(`${config.apiUrl}/customers`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${AUTH_TOKEN}`,
@@ -37,12 +40,12 @@ const Customers = () => {
 
         const updatedCustomers = await Promise.all(
           customers.map(async (customer) => {
-            const orderRes = await fetch(`http://localhost:8080/orders/count/${customer.name}`, {
+            const orderRes = await fetch(`${config.apiUrl}/orders/count/${customer.name}`, {
               headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
             });
             const orderData = await orderRes.json();
 
-            const salesRes = await fetch(`http://localhost:8080/totalSales/${customer.name}`, {
+            const salesRes = await fetch(`${config.apiUrl}/totalSales/${customer.name}`, {
               headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
             });
             const salesData = await salesRes.json();
@@ -124,7 +127,7 @@ const Customers = () => {
              >
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.number}</TableCell>
                   <TableCell>{customer.country}</TableCell>
                   <TableCell>{customer.order_count}</TableCell>
                   <TableCell>${customer.total_sales}</TableCell>

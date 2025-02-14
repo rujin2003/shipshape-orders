@@ -1,4 +1,5 @@
 export interface OrderItem {
+  size: null;
   id: number;
   name: string;
   quantity: number;
