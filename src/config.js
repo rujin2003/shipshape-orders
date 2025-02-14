@@ -1,3 +1,3 @@
 export default {
-    apiUrl : 'http://localhost:8080'
+    apiUrl : 'https://oms-order-management.onrender.com'
 }
