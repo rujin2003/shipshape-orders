@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -8,7 +9,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { AlertCircle, RefreshCcw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import config from '@/config';
+
 interface Order {
   id: number;
   customer_name: string;
@@ -22,42 +28,76 @@ const RecentOrders = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchRecentOrders = async () => {
-      
-      try {
-        
-        const headers = {
-          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-          "Content-Type": "application/json",
-        };
-
-        const response = await fetch(`${config.apiUrl}/orders/recentorders`, {
-          method: "GET",
-          headers,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch recent orders");
-        }
-
-        const data = await response.json();
-        
+  const fetchRecentOrders = async () => {
+    setLoading(true);
+    setError(null);
     
-        setOrders(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Error fetching recent orders:", err);
-        setError("Could not load recent orders.");
-      } finally {
-        setLoading(false);
+    try {
+      const headers = {
+        "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await fetch(`${config.apiUrl}/orders/recentorders`, {
+        method: "GET",
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch recent orders");
       }
-    };
 
+      const data = await response.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching recent orders:", err);
+      setError("Could not load recent orders.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchRecentOrders();
-  }, [RecentOrders]);
+  }, []);
 
-  if (loading) return <p>Loading recent orders...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) {
+    return (
+      <Card className="col-span-4">
+        <CardHeader>
+          <CardTitle>Recent Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LoadingSpinner />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="col-span-4">
+        <CardHeader>
+          <CardTitle>Recent Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-4"
+              onClick={fetchRecentOrders}
+            >
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-4">
