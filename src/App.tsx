@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,13 +22,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex h-screen">
+        <div className="flex min-h-screen overflow-hidden bg-gray-50">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto p-6">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/orders" element={<Orders />} />
-              <Route path="/orders/new" element={<NewOrderForm orderId={""} />} />
+              <Route path="/orders/new" element={<NewOrderForm />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/customers/:id" element={<CustomerDetails />} />
               <Route path="/shipments" element={<Shipments />} />

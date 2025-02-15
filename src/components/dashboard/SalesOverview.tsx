@@ -104,11 +104,11 @@ const SalesOverview = () => {
 
   if (loading) {
     return (
-      <Card className="col-span-4">
-        <CardContent className="p-6">
+      <Card className="col-span-4 shadow-lg">
+        <CardContent className="p-8">
           <div className="flex flex-col items-center justify-center min-h-[200px]">
             <LoadingSpinner />
-            <p className="text-sm text-muted-foreground mt-2">Loading statistics...</p>
+            <p className="text-sm text-muted-foreground mt-4">Loading statistics...</p>
           </div>
         </CardContent>
       </Card>
@@ -117,14 +117,14 @@ const SalesOverview = () => {
 
   if (error) {
     return (
-      <div className="space-y-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+      <div className="space-y-4 p-4">
+        <Alert variant="destructive" className="shadow-md">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription className="ml-2">{error}</AlertDescription>
           <Button
             variant="outline"
             size="sm"
-            className="ml-4"
+            className="ml-4 hover:bg-destructive/10"
             onClick={fetchStats}
           >
             <RefreshCcw className="h-4 w-4 mr-2" />
@@ -136,20 +136,20 @@ const SalesOverview = () => {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {statsConfig.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.title}>
+          <Card key={stat.title} className="transition-all duration-200 hover:shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
               </CardTitle>
-              <Icon className="h-4 w-4 text-muted-foreground" />
+              <Icon className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-primary">{stat.value}</div>
+              <p className="text-xs text-muted-foreground mt-2">
                 {stat.description}
               </p>
             </CardContent>

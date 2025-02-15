@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -18,26 +19,27 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen w-64 border-r bg-white p-4">
+    <div className="h-screen min-w-[240px] border-r bg-white p-6 shadow-sm transition-all duration-200 ease-in-out lg:w-64">
       <div className="mb-8">
-        <h1 className="text-xl font-bold text-primary">Order Manager</h1>
+        <h1 className="text-2xl font-bold text-primary">Order Manager</h1>
       </div>
-      <nav className="space-y-2">
+      <nav className="space-y-3">
         {links.map((link) => {
           const Icon = link.icon;
+          const isActive = location.pathname === link.href;
           return (
             <Link
               key={link.href}
               to={link.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                location.pathname === link.href
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-200",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground hover:shadow-sm"
               )}
             >
-              <Icon className="h-4 w-4" />
-              {link.label}
+              <Icon className={cn("h-5 w-5", isActive ? "text-current" : "text-muted-foreground")} />
+              <span className="font-medium">{link.label}</span>
             </Link>
           );
         })}
