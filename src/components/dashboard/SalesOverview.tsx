@@ -104,15 +104,14 @@ const SalesOverview = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <LoadingSpinner />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="col-span-4">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center min-h-[200px]">
+            <LoadingSpinner />
+            <p className="text-sm text-muted-foreground mt-2">Loading statistics...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
