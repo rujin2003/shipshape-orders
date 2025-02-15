@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -6,66 +7,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NewCustomerForm from "@/components/customers/NewCustomerForm";
 import EditCustomerForm from "@/components/customers/EditCustomerForm";
 import { toast } from "sonner";
 import { UserPlus, Pencil } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import config from '@/config';
 
 const Customers = () => {
   const navigate = useNavigate();
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
-  const [customersData, setCustomersData] = useState([]);
   
   const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const { data: customersData = [], isLoading, error } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const customersResponse = await fetch(`${config.apiUrl}/customers`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${AUTH_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-      try {
-        
-        const customersResponse = await fetch(`${config.apiUrl}/customers`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${AUTH_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        });
+      if (!customersResponse.ok) throw new Error(`Error: ${customersResponse.status}`);
+      const customers = await customersResponse.json();
 
-        if (!customersResponse.ok) throw new Error(`Error: ${customersResponse.status}`);
-        const customers = await customersResponse.json();
+      const updatedCustomers = await Promise.all(
+        customers.map(async (customer) => {
+          const orderRes = await fetch(`${config.apiUrl}/orders/count/${customer.name}`, {
+            headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
+          });
+          const orderData = await orderRes.json();
 
-        const updatedCustomers = await Promise.all(
-          customers.map(async (customer) => {
-            const orderRes = await fetch(`${config.apiUrl}/orders/count/${customer.name}`, {
-              headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
-            });
-            const orderData = await orderRes.json();
+          const salesRes = await fetch(`${config.apiUrl}/totalSales/${customer.name}`, {
+            headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
+          });
+          const salesData = await salesRes.json();
 
-            const salesRes = await fetch(`${config.apiUrl}/totalSales/${customer.name}`, {
-              headers: { "Authorization": `Bearer ${AUTH_TOKEN}` },
-            });
-            const salesData = await salesRes.json();
+          return {
+            ...customer,
+            order_count: orderData.order_count,
+            total_sales: salesData.total_sales,
+          };
+        })
+      );
 
-            return {
-              ...customer,
-              order_count: orderData.order_count,
-              total_sales: salesData.total_sales,
-            };
-          })
-        );
-
-        setCustomersData(updatedCustomers);
-      } catch (error) {
-        toast.error("Failed to fetch customer data");
-      }
-    };
-
-    fetchData();
-  }, []);
+      return updatedCustomers;
+    },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+  });
 
   const handleEdit = (customer) => {
     setEditingCustomer(customer);
@@ -80,24 +76,30 @@ const Customers = () => {
     navigate(`/customers/${customerId}`);
   };
 
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error loading customers</div>;
+  }
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Customers</h2>
         <button
-  className="add-customer-button"
-  onClick={() => setShowNewCustomer(!showNewCustomer)}
->
-  <span className="button_lg">
-    <span className="button_sl"></span>
-    <span className="button_text">
-      <UserPlus className="mr-2 h-4 w-4 inline" />
-      Add Customer
-    </span>
-  </span>
-</button>
-
+          className="add-customer-button"
+          onClick={() => setShowNewCustomer(!showNewCustomer)}
+        >
+          <span className="button_lg">
+            <span className="button_sl"></span>
+            <span className="button_text">
+              <UserPlus className="mr-2 h-4 w-4 inline" />
+              Add Customer
+            </span>
+          </span>
+        </button>
       </div>
 
       {showNewCustomer ? (
@@ -120,11 +122,11 @@ const Customers = () => {
             </TableHeader>
             <TableBody>
               {customersData.map((customer) => (
-               <TableRow
-               key={customer.id}
-               className="cursor-pointer hover:bg-muted/50"
-               onClick={() => handleRowClick(customer.id)} 
-             >
+                <TableRow
+                  key={customer.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleRowClick(customer.id)}
+                >
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
                   <TableCell>{customer.number}</TableCell>
@@ -153,8 +155,8 @@ const Customers = () => {
           </Table>
         </div>
       )}
-     <style>
-  {`
+      <style>
+        {`
     .add-customer-button {
       -moz-appearance: none;
       -webkit-appearance: none;
@@ -253,7 +255,7 @@ const Customers = () => {
       bottom: -1px;
       left: -8px;
       width: 0;
-      background-color: #6495ED ;
+      background-color: #6495ED;
       transform: skew(-15deg);
       transition: all 0.2s ease;
     }
@@ -274,8 +276,7 @@ const Customers = () => {
       background-color: #fff;
     }
   `}
-</style>
-
+      </style>
     </div>
   );
 };

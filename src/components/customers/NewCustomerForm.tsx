@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,25 +13,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import config from '@/config';
 
 interface NewCustomerFormProps {
   onCancel: () => void;
 }
 
-// Schema with phone number as a string
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   number: z
     .string()
     .min(10, "Phone number must be at least 10 digits")
-    .regex(/^\d+$/, "Phone number must contain only numbers"), // Ensure only digits
+    .regex(/^\d+$/, "Phone number must contain only numbers"),
   email: z.string().email("Invalid email address"),
   country: z.string().min(2, "Country must be at least 2 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
 });
 
 const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
+  const queryClient = useQueryClient();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,14 +45,12 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>,event) => {
-    
+  const onSubmit = async (values: z.infer<typeof formSchema>, event: any) => {
     try {
       event.preventDefault();
-      // Convert phone number to an integer 
       const customerData = {
         ...values,
-        phone: parseInt(values.number, 10), // Convert phone to integer
+        phone: parseInt(values.number, 10),
       };
 
       const response = await fetch(`${config.apiUrl}/customers`, {
@@ -64,6 +65,10 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
       if (!response.ok) throw new Error("Failed to add customer");
 
       toast.success("Customer added successfully!");
+      
+      // Invalidate and refetch customers data
+      await queryClient.invalidateQueries({ queryKey: ['customers'] });
+      
       form.reset();
       onCancel();
     } catch (error) {
@@ -94,12 +99,7 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="1234567890"
-                  {...field}
-                 
-                
-                />
+                <Input placeholder="1234567890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -145,7 +145,7 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
           )}
         />
         <div className="flex gap-4">
-          <Button type="submit" className="flex-1" >
+          <Button type="submit" className="flex-1">
             Add Customer
           </Button>
           <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
