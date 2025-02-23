@@ -55,7 +55,6 @@ const CreateShipment = () => {
 
   // Fetch customers
   useEffect(() => {
-    
     fetch(`${config.apiUrl}/customers`, {
       method: "GET",
       headers: {
@@ -79,23 +78,30 @@ const CreateShipment = () => {
       toast({ title: "Error", description: "Please select a customer and date", variant: "destructive" });
       return;
     }
-   
+    
+    // Format the date to YYYY-MM-DD
+    const formattedDate = new Date(selectedDate).toISOString().split('T')[0];
+    console.log("Fetching orders for:", selectedCustomer, formattedDate);
 
     setLoading(true);
     setFetched(true);
-    fetch(`${config.apiUrl}/${selectedCustomer}/${selectedDate}`, {
+    fetch(`${config.apiUrl}/orders/${selectedCustomer}/${formattedDate}`, {
       method: "GET",
       headers: {
         Authorization: "Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK",
         "Content-Type": "application/json",
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
-        // Ensure data is an array, even if API returns null or undefined
+        console.log("Received orders:", data);
         setOrders(Array.isArray(data) ? data : []);
         if (Array.isArray(data) && data.length === 1) {
-          // If only one order is found, set it as the selected order
           handleOrderSelect(data[0].id);
         } else {
           setSelectedOrder(null);
@@ -103,8 +109,12 @@ const CreateShipment = () => {
       })
       .catch((err) => {
         console.error("Error fetching orders:", err);
-        toast({ title: "Error", description: "Failed to fetch orders", variant: "destructive" });
-        setOrders([]); // Set orders to an empty array in case of error
+        toast({ 
+          title: "Error", 
+          description: "Failed to fetch orders. Make sure the date format is correct (YYYY-MM-DD)", 
+          variant: "destructive" 
+        });
+        setOrders([]);
       })
       .finally(() => setLoading(false));
   };
@@ -183,7 +193,12 @@ const CreateShipment = () => {
           </SelectContent>
         </Select>
 
-        <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+        <Input 
+          type="date" 
+          value={selectedDate} 
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="min-w-[200px]"
+        />
         <Button onClick={fetchOrders} disabled={loading}>
           {loading ? "Fetching..." : "Fetch Orders"}
         </Button>
@@ -191,7 +206,7 @@ const CreateShipment = () => {
 
       {/* Display "Order not found" message only after fetching */}
       {fetched && !loading && orders.length === 0 && (
-        <p className="text-gray-500 italic">Order not found</p>
+        <p className="text-gray-500 italic">No orders found for the selected date</p>
       )}
 
       {/* Order Selection (only show if more than one order is found) */}
