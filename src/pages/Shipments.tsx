@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -64,26 +65,40 @@ const Shipments = () => {
     navigate("/shipments/create");
   };
 
-  const handleDownload = async (shipmentId: number) => {
+  const handleDownload = async (shipmentId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row expansion when clicking download
+    
     try {
-      const response = await fetch(`${config.apiUrl}/shipments/${shipmentId}/download`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${AUTH_TOKEN}`,
-        },
+      // Create a hidden anchor element
+      const link = document.createElement('a');
+      link.href = `${config.apiUrl}/shipments/${shipmentId}/download`;
+      link.setAttribute('download', `shipment-${shipmentId}`);
+      link.setAttribute('target', '_blank');
+      // Add authorization header through a redirect
+      const headers = new Headers({
+        'Authorization': `Bearer ${AUTH_TOKEN}`
       });
-
+      
+      const response = await fetch(link.href, {
+        headers: headers
+      });
+      
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       
+      // Get the blob from the response
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `shipment-${shipmentId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
+      
+      // Update the link href with the blob URL
+      link.href = url;
+      
+      // Append to body, click and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
       
       toast.success("Download started");
     } catch (error) {
@@ -143,9 +158,8 @@ const Shipments = () => {
           <TableBody>
             {filteredShipments.length > 0 ? (
               filteredShipments.map((shipment) => (
-                <>
+                <React.Fragment key={shipment.id}>
                   <TableRow 
-                    key={shipment.id}
                     className="cursor-pointer"
                     onClick={() => toggleShipmentDetails(shipment.id)}
                   >
@@ -168,10 +182,7 @@ const Shipments = () => {
                         variant="outline"
                         size="sm"
                         className="bg-green-500 hover:bg-green-600 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownload(shipment.id);
-                        }}
+                        onClick={(e) => handleDownload(shipment.id, e)}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -207,7 +218,7 @@ const Shipments = () => {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </React.Fragment>
               ))
             ) : (
               <TableRow>
@@ -349,3 +360,4 @@ const Shipments = () => {
 };
 
 export default Shipments;
+
