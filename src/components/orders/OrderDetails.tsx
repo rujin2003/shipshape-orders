@@ -83,13 +83,6 @@ const OrderDetails = ({
     fetchDueItems();
   }, [order.id, order.status]);
 
-  const handleQuantityChange = (itemId: number, value: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [itemId]: value > 0 ? value : 1,
-    }));
-  };
-
   const handleDelete = () => {
     onDeleteOrder(order.id);
   };
@@ -134,25 +127,12 @@ const OrderDetails = ({
                   {order.items.map((item) => (
                     <tr key={item.id}>
                       <td className="px-4 py-2 border">{item.name}</td>
+                      <td className="px-4 py-2 border">{item.quantity}</td>
                       <td className="px-4 py-2 border">
-                        <input
-                          type="number"
-                          min={1}
-                          value={quantities[item.id]}
-                          onChange={(e) =>
-                            handleQuantityChange(item.id, parseInt(e.target.value))
-                          }
-                          className="w-16 px-2 py-1 border rounded-md"
+                        <div
+                          className="w-5 h-5 rounded-full border"
+                          style={{ backgroundColor: item.color }}
                         />
-                      </td>
-                      <td className="px-4 py-2 border">
-                        <div className="flex items-center space-x-2">
-                          <span>{item.color}</span>
-                          <div
-                            className="w-5 h-5 rounded-full border"
-                            style={{ backgroundColor: item.color }}
-                          />
-                        </div>
                       </td>
                       <td className="px-4 py-2 border">${item.price.toFixed(2)}</td>
                       <td className="px-4 py-2 border">
@@ -171,7 +151,7 @@ const OrderDetails = ({
         {/* Due Items Table */}
         {order.status === "shipped and due" && dueItems.length > 0 && (
           <div className="mt-6">
-            <h3 className="font-semibold mb-2 text-yellow-600">Due Items</h3>
+            <h3 className="font-semibold mb-2 text-red-600">Due Items</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full bg-white border rounded-md">
                 <thead className="bg-yellow-50">
@@ -189,13 +169,10 @@ const OrderDetails = ({
                       <td className="px-4 py-2 border">{item.name}</td>
                       <td className="px-4 py-2 border">{item.quantity}</td>
                       <td className="px-4 py-2 border">
-                        <div className="flex items-center space-x-2">
-                          <span>{item.color}</span>
-                          <div
-                            className="w-5 h-5 rounded-full border"
-                            style={{ backgroundColor: item.color }}
-                          />
-                        </div>
+                        <div
+                          className="w-5 h-5 rounded-full border"
+                          style={{ backgroundColor: item.color }}
+                        />
                       </td>
                       <td className="px-4 py-2 border">${item?.price?.toFixed(2)}</td>
                       <td className="px-4 py-2 border">
@@ -225,3 +202,4 @@ const OrderDetails = ({
 };
 
 export default OrderDetails;
+
