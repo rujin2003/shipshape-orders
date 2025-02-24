@@ -6,27 +6,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Order } from "@/types/order";
-import { useNavigate } from "react-router-dom";
 
 interface OrderViewModalProps {
   order: Order | null;
   isOpen: boolean;
   onClose: () => void;
-  onEditOrder: (orderId: string) => void;
 }
 
 const OrderViewModal = ({
   order,
   isOpen,
   onClose,
-  onEditOrder,
 }: OrderViewModalProps) => {
-  const navigate = useNavigate();
-  
   if (!order) return null;
 
   return (
@@ -106,12 +99,6 @@ const OrderViewModal = ({
             </div>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => navigate(`/orders/${order.id}/edit`)}>
-            Edit Order
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

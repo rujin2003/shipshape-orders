@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download } from "lucide-react";
+import { Download } from "lucide-react";
 
 interface ShipmentViewModalProps {
   shipment: any;
@@ -29,12 +29,7 @@ const ShipmentViewModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">Shipment Details</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-2xl font-bold">Shipment Details</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">

@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import config from '@/config';
+
 interface Customer {
   id: number;
   name: string;
@@ -123,6 +124,10 @@ const NewOrderForm = () => {
 
   const addItem = () => {
     setItems([...items, { name: "", size: "", color: "", price: 0, quantity: 1 }]);
+  };
+
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
   };
 
   const updateItem = (index: number, field: keyof OrderItem, value: any) => {
@@ -290,6 +295,17 @@ const NewOrderForm = () => {
               {items.map((item, index) => (
                 <Card key={index}>
                   <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm font-medium">Item {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeItem(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                     <Input
                       placeholder="Name"
                       value={item.name}
