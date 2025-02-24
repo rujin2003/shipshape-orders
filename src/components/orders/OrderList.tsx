@@ -20,7 +20,6 @@ interface OrderListProps {
   onEditOrder: (orderId: string) => void;
   selectedItems: number[];
   onItemSelect: (itemId: number) => void;
-  onCreateShipment: (orderId: string) => void;
   onDeleteOrder: (orderId: string) => void;
   searchQuery?: string;
 }
@@ -32,7 +31,6 @@ const OrderList = ({
   onEditOrder,
   selectedItems,
   onItemSelect,
-  onCreateShipment,
   onDeleteOrder,
   searchQuery = "",
 }: OrderListProps) => {
@@ -83,7 +81,6 @@ const OrderList = ({
         order={orders.find((o) => o.id === viewOrderId)}
         isOpen={!!viewOrderId}
         onClose={() => setViewOrderId(null)}
-        onCreateShipment={onCreateShipment}
         onEditOrder={onEditOrder}
       />
     </>

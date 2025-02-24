@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Order } from "@/types/order";
-import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface OrderViewModalProps {
   order: Order | null;
@@ -25,18 +25,15 @@ const OrderViewModal = ({
   onClose,
   onEditOrder,
 }: OrderViewModalProps) => {
+  const navigate = useNavigate();
+  
   if (!order) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">Order Details</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-2xl font-bold">Order Details</DialogTitle>
           <DialogDescription>
             View and manage order details
           </DialogDescription>
@@ -111,7 +108,7 @@ const OrderViewModal = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onEditOrder(order.id)}>
+          <Button variant="outline" onClick={() => navigate(`/orders/${order.id}/edit`)}>
             Edit Order
           </Button>
         </DialogFooter>

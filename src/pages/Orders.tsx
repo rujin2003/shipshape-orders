@@ -6,17 +6,14 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import OrderList from "@/components/orders/OrderList";
-import EditOrderModal from "@/components/orders/EditOrderModal";
-import { Order, OrderItem } from "@/types/order";
 import config from '@/config';
+import { Order } from "@/types/order";
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [editingOrder, setEditingOrder] = useState<string | null>(null);
-  const [editedItems, setEditedItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +21,6 @@ const Orders = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    
     fetch(`${config.apiUrl}/orders`, {
       method: "GET",
       headers: {
@@ -37,7 +33,6 @@ const Orders = () => {
         return response.json();
       })
       .then((data) => {
-        // Ensure response is an array; if not, set an empty array
         const mappedOrders: Order[] = Array.isArray(data)
           ? data.map((order: any) => ({
               id: order.id.toString(),
@@ -51,6 +46,11 @@ const Orders = () => {
                 quantity: item.quantity,
                 price: item.price,
               })),
+              dueItems: order.due_items?.map((item: any) => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+              })) || [],
               address: order.shipment_address,
             }))
           : [];
@@ -77,7 +77,7 @@ const Orders = () => {
       <div className="flex justify-end p-4">
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">{error}. Please try again later.</AlertDescription>
+          <AlertDescription className="ml-2">{error}</AlertDescription>
         </Alert>
       </div>
     );
@@ -86,8 +86,6 @@ const Orders = () => {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
-
-        {/* Updated Create Order Button */}
         <button
           className="add-customer-button"
           onClick={() => navigate(`/orders/new`)}
@@ -120,40 +118,13 @@ const Orders = () => {
             onOrderClick={(orderId) =>
               setExpandedOrder(expandedOrder === orderId ? null : orderId)
             }
-            onEditOrder={(orderId) => {
-              const order = orders.find((o) => o.id === orderId);
-              if (order) {
-                setEditedItems([...order.items]);
-                setEditingOrder(orderId);
-              }
-            }}
+            onEditOrder={(orderId) => navigate(`/orders/${orderId}/edit`)}
             selectedItems={selectedItems}
             onItemSelect={(itemId) =>
-              setSelectedItems((prev) =>
-                prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+              setSelectedItems(prev =>
+                prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
               )
             }
-            onCreateShipment={(orderId) => {
-              if (selectedItems.length === 0) {
-                toast({
-                  title: "Error",
-                  description: "Please select at least one item to ship.",
-                  variant: "destructive",
-                });
-                return;
-              }
-
-              const order = orders.find((order) => order.id === orderId);
-              if (!order) return;
-
-              navigate(`/shipments/new`, {
-                state: {
-                  orderId,
-                  selectedItems,
-                  orderDetails: order,
-                },
-              });
-            }}
             onDeleteOrder={async (orderId) => {
               try {
                 const order = orders.find((o) => o.id === orderId);
@@ -165,7 +136,6 @@ const Orders = () => {
                   });
                   return;
                 }
-                
 
                 const response = await fetch(`${config.apiUrl}/orders/${order.id}`, {
                   method: "DELETE",
@@ -196,6 +166,7 @@ const Orders = () => {
                 });
               }
             }}
+            searchQuery={searchQuery}
           />
         ) : (
           <div className="flex justify-center items-center p-4">
@@ -204,26 +175,6 @@ const Orders = () => {
         )}
       </div>
 
-      <EditOrderModal
-        isOpen={editingOrder !== null}
-        onClose={() => setEditingOrder(null)}
-        order={orders.find((o) => o.id === editingOrder) || null}
-        editedItems={editedItems}
-        onUpdateItem={(index, field, value) => {
-          const updatedItems = [...editedItems];
-          updatedItems[index] = { ...updatedItems[index], [field]: value };
-          setEditedItems(updatedItems);
-        }}
-        onSave={() => {
-          toast({
-            title: "Order Updated",
-            description: "The order has been successfully updated.",
-          });
-          setEditingOrder(null);
-        }}
-      />
-
-      {/* Add the same CSS styles for the button */}
       <style>
         {`
           .add-customer-button {
