@@ -81,7 +81,6 @@ const OrderList = ({
         order={orders.find((o) => o.id === viewOrderId)}
         isOpen={!!viewOrderId}
         onClose={() => setViewOrderId(null)}
-        onEditOrder={onEditOrder}
       />
     </>
   );
