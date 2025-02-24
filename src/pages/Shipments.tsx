@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Table,
@@ -9,12 +8,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Package, Search, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Package, Search, ChevronDown, ChevronRight, Download, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import config from '@/config';
 import { Button } from "@/components/ui/button";
+import ShipmentViewModal from "@/components/shipments/ShipmentViewModal";
 
 interface ShipmentItem {
   id: number;
@@ -37,8 +37,8 @@ const Shipments = () => {
   const [expandedShipment, setExpandedShipment] = useState<number | null>(null);
   const navigate = useNavigate();
   const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
+  const [viewShipmentId, setViewShipmentId] = useState<number | null>(null);
 
-  // Fetch shipments data from API
   useEffect(() => {
     const fetchShipments = async () => {
       try {
@@ -67,15 +67,13 @@ const Shipments = () => {
   };
 
   const handleDownload = async (shipmentId: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row expansion when clicking download
+    e.stopPropagation();
     
     try {
-      // Create a hidden anchor element
       const link = document.createElement('a');
       link.href = `${config.apiUrl}/shipments/${shipmentId}/download`;
       link.setAttribute('download', `shipment-${shipmentId}`);
       link.setAttribute('target', '_blank');
-      // Add authorization header through a redirect
       const headers = new Headers({
         'Authorization': `Bearer ${AUTH_TOKEN}`
       });
@@ -86,19 +84,15 @@ const Shipments = () => {
       
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       
-      // Get the blob from the response
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       
-      // Update the link href with the blob URL
       link.href = url;
       
-      // Append to body, click and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      // Cleanup
       window.URL.revokeObjectURL(url);
       
       toast.success("Download started");
@@ -160,10 +154,7 @@ const Shipments = () => {
             {filteredShipments.length > 0 ? (
               filteredShipments.map((shipment) => (
                 <React.Fragment key={shipment.id}>
-                  <TableRow 
-                    className="cursor-pointer"
-                    onClick={() => toggleShipmentDetails(shipment.id)}
-                  >
+                  <TableRow className="cursor-pointer">
                     <TableCell>
                       {expandedShipment === shipment.id ? (
                         <ChevronDown className="h-4 w-4" />
@@ -180,45 +171,17 @@ const Shipments = () => {
                     </TableCell>
                     <TableCell>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-green-500 hover:bg-green-600 text-white"
-                        onClick={(e) => handleDownload(shipment.id, e)}
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewShipmentId(shipment.id);
+                        }}
                       >
-                        <Download className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
-                  
-                  {expandedShipment === shipment.id && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="bg-muted/50">
-                        <div className="p-4">
-                          <h4 className="font-semibold mb-2">Shipped Items</h4>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Item Name</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Total</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {shipment.items.map((item) => (
-                                <TableRow key={item.id}>
-                                  <TableCell>{item.name}</TableCell>
-                                  <TableCell>{item.quantity}</TableCell>
-                                  <TableCell>${item.price.toFixed(2)}</TableCell>
-                                  <TableCell>${(item.quantity * item.price).toFixed(2)}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </React.Fragment>
               ))
             ) : (
@@ -233,6 +196,13 @@ const Shipments = () => {
           </TableBody>
         </Table>
       </div>
+
+      <ShipmentViewModal
+        shipment={shipmentsData.find((s) => s.id === viewShipmentId)}
+        isOpen={!!viewShipmentId}
+        onClose={() => setViewShipmentId(null)}
+        onDownload={handleDownload}
+      />
 
       <style>
         {`
@@ -361,4 +331,3 @@ const Shipments = () => {
 };
 
 export default Shipments;
-
