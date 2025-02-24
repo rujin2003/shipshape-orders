@@ -8,9 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, ChevronDown, ChevronRight, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Order } from "@/types/order";
-import OrderDetails from "./OrderDetails";
 import { useState } from "react";
 import OrderViewModal from "./OrderViewModal";
 
@@ -23,6 +22,7 @@ interface OrderListProps {
   onItemSelect: (itemId: number) => void;
   onCreateShipment: (orderId: string) => void;
   onDeleteOrder: (orderId: string) => void;
+  searchQuery?: string;
 }
 
 const OrderList = ({
@@ -34,15 +34,20 @@ const OrderList = ({
   onItemSelect,
   onCreateShipment,
   onDeleteOrder,
+  searchQuery = "",
 }: OrderListProps) => {
   const [viewOrderId, setViewOrderId] = useState<string | null>(null);
+
+  const filteredOrders = orders.filter((order) =>
+    order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px]"></TableHead>
             <TableHead className="w-[200px]">Order ID</TableHead>
             <TableHead className="w-[200px]">Customer</TableHead>
             <TableHead className="w-[200px]">Date</TableHead>
@@ -51,15 +56,8 @@ const OrderList = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <TableRow key={order.id} className="cursor-pointer">
-              <TableCell>
-                {expandedOrder === order.id ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </TableCell>
               <TableCell className="font-medium">{order.id}</TableCell>
               <TableCell>{order.customerName}</TableCell>
               <TableCell>{order.orderDate}</TableCell>

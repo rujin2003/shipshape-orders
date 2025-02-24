@@ -10,14 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Order } from "@/types/order";
-import { Package, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 interface OrderViewModalProps {
   order: Order | null;
   isOpen: boolean;
   onClose: () => void;
-  onCreateShipment: (orderId: string) => void;
   onEditOrder: (orderId: string) => void;
 }
 
@@ -25,11 +23,8 @@ const OrderViewModal = ({
   order,
   isOpen,
   onClose,
-  onCreateShipment,
   onEditOrder,
 }: OrderViewModalProps) => {
-  const navigate = useNavigate();
-
   if (!order) return null;
 
   return (
@@ -42,6 +37,9 @@ const OrderViewModal = ({
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </div>
+          <DialogDescription>
+            View and manage order details
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -87,7 +85,7 @@ const OrderViewModal = ({
             </div>
           </div>
 
-          {order.status === "shipped and due" && (
+          {order.dueItems && order.dueItems.length > 0 && (
             <div>
               <h3 className="font-semibold mb-2 text-red-600">Due Items</h3>
               <div className="border rounded-md border-red-200">
@@ -99,7 +97,7 @@ const OrderViewModal = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {order.dueItems?.map((item: any) => (
+                    {order.dueItems.map((item) => (
                       <tr key={item.id}>
                         <td className="px-4 py-3">{item.name}</td>
                         <td className="px-4 py-3">{item.quantity}</td>
@@ -112,16 +110,10 @@ const OrderViewModal = ({
           )}
         </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onEditOrder(order.id)}>
             Edit Order
           </Button>
-          {(order.status === "pending" || order.status === "shipped and due") && (
-            <Button onClick={() => onCreateShipment(order.id)}>
-              <Package className="mr-2 h-4 w-4" />
-              Create Shipment
-            </Button>
-          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
