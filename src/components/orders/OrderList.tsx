@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import { Edit2, ChevronDown, ChevronRight, Eye } from "lucide-react";
 import { Order } from "@/types/order";
 import OrderDetails from "./OrderDetails";
 import { useState } from "react";
-import OrderViewModal from "@/components/OrderViewModal";
+import OrderViewModal from "./OrderViewModal";
 
 interface OrderListProps {
   orders: Order[];
