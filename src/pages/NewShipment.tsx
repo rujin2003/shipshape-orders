@@ -1,3 +1,4 @@
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,25 +27,27 @@ const NewShipment = () => {
   const handleCreateShipment = async () => {
     setLoading(true);
 
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
     // Construct the shipment data to match API expectations
     const shipmentData = {
+      shipped_date: formattedDate,
       order_id: orderId,
-      shipped_date: new Date().toISOString(),
       items: selectedOrderItems.map((item) => ({
         id: item.id,
         name: item.name,
         size: item.size,
         color: item.color,
         price: item.price,
-        quantity: item.quantity, // Ensure quantity is included
+        quantity: item.quantity,
       })),
       due_order_type: false,
     };
 
-    console.log("Final shipment request:", JSON.stringify(shipmentData, null, 2)); // Debugging log
+    console.log("Shipment request payload:", JSON.stringify(shipmentData, null, 2));
 
     try {
-    
       const response = await fetch(`${config.apiUrl}/shipments`, {
         method: "POST",
         headers: {
@@ -55,13 +58,14 @@ const NewShipment = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create shipment");
+        const errorData = await response.json().catch(() => null);
+        console.error("Server response:", errorData);
+        throw new Error(errorData?.message || "Failed to create shipment");
       }
 
       toast({
         title: "Success",
         description: "Shipment created successfully!",
-       
       });
 
       navigate("/shipments");
@@ -69,7 +73,7 @@ const NewShipment = () => {
       console.error("Error creating shipment:", error);
       toast({
         title: "Error",
-        description: "Failed to create shipment",
+        description: error instanceof Error ? error.message : "Failed to create shipment",
         variant: "destructive",
       });
     } finally {
