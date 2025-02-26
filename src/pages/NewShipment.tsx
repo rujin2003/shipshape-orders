@@ -44,7 +44,7 @@ const NewShipment = () => {
     };
 
     try {
-      const response = await fetch(`${config.apiUrl}${config.shipmentEndpoint}`, {
+      const response = await fetch(`${config.apiUrl}${config.createShipmentEndpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

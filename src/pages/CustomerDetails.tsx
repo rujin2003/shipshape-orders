@@ -1,182 +1,127 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, Mail, Phone } from "lucide-react";
 import config from '@/config';
-
-const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
 
 const CustomerDetails = () => {
   const { id } = useParams();
+  const customerId = Number(id);
   const navigate = useNavigate();
-  const [customer, setCustomer] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [shipments, setShipments] = useState([]);
 
-  useEffect(() => {
-    const fetchCustomerDetails = async () => {
-      try {
-        
-        const customerResponse = await fetch(`${config.apiUrl}/customers/${id}`, {
-          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
-        });
-        if (!customerResponse.ok) throw new Error("Failed to fetch customer details");
-        const customerData = await customerResponse.json();
-        setCustomer(customerData);
+  const { data: customerData, isLoading: isLoadingCustomer } = useQuery({
+    queryKey: ['customer', customerId],
+    queryFn: async () => {
+      const response = await fetch(`${config.apiUrl}/customers/${customerId}`, {
+        headers: {
+          Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch customer');
+      return response.json();
+    },
+  });
 
-        const ordersResponse = await fetch(`${config.apiUrl}/orders/history/${customerData.name}`, {
-          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
-        });
-        const ordersData = ordersResponse.ok ? await ordersResponse.json() : [];
-        setOrders(ordersData || []);
-
-        const shipmentsResponse = await fetch(`${config.apiUrl}/shipments/${customerData.name}`, {
-          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
-        });
-        const shipmentsData = shipmentsResponse.ok ? await shipmentsResponse.json() : [];
-        setShipments(shipmentsData || []);
-
-      } catch (error) {
-        toast.error(error.message);
-      }
-    };
-
-    fetchCustomerDetails();
-  }, [id]);
-
-  // DELETE request for customer
-  const handleDeleteCustomer = async () => {
-    if (window.confirm("Are you sure you want to delete this customer?")) {
-      try {
-        
-        const deleteResponse = await fetch(`${config.apiUrl}/customers/${id}`, {
-          method: "DELETE",
+  const { data: shipments = [], isLoading: isLoadingShipments } = useQuery({
+    queryKey: ['customerShipments', customerId],
+    queryFn: async () => {
+      const response = await fetch(
+        `${config.apiUrl}${config.customerShipmentEndpoint}/${customerData?.name}`,
+        {
           headers: {
-            Authorization: `Bearer ${AUTH_TOKEN}`,
+            Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
             "Content-Type": "application/json",
           },
-        });
+        }
+      );
+      if (!response.ok) throw new Error('Failed to fetch customer shipments');
+      return response.json();
+    },
+    enabled: !!customerData?.name,
+  });
 
-        if (!deleteResponse.ok) throw new Error("Failed to delete customer");
+  if (isLoadingCustomer) {
+    return <div>Loading customer data...</div>;
+  }
 
-        toast.success("Customer deleted successfully");
-        navigate("/customers");  // Redirect back to the Customers list
-      } catch (error) {
-        toast.error("Failed to delete customer");
-      }
-    }
-  };
+  if (!customerData) {
+    return <div>Customer not found</div>;
+  }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Customer Details</h2>
-        <Link to="/customers">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Customers
-          </Button>
-        </Link>
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
       </div>
 
-      <div className="grid gap-6">
-        {/* Customer Information */}
-        {customer && (
-          <div className="rounded-lg border p-6 relative">
-            <h3 className="text-xl font-semibold mb-4">Customer Information</h3>
-            {/* Delete Icon */}
-            <button
-              onClick={handleDeleteCustomer}
-              className="absolute top-4 right-4 text-red-600 hover:text-red-800"
-              title="Delete Customer"
-            >
-              <Trash2 className="h-6 w-6" />
-            </button>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Name</p>
-                <p className="font-medium">{customer.name || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{customer.email || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{customer.number || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Country</p>
-                <p className="font-medium">{customer.country || "N/A"}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="font-medium">{customer.address || "N/A"}</p>
-              </div>
-            </div>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="rounded-md border p-4">
+          <h3 className="text-xl font-semibold mb-2">Customer Information</h3>
+          <div className="space-y-2">
+            <p>
+              <strong>Name:</strong> {customerData.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {customerData.email} <Mail className="inline-block h-4 w-4 ml-1 text-muted-foreground" />
+            </p>
+            <p>
+              <strong>Phone:</strong> {customerData.number} <Phone className="inline-block h-4 w-4 ml-1 text-muted-foreground" />
+            </p>
+            <p>
+              <strong>Address:</strong> {customerData.address}, {customerData.country}
+            </p>
           </div>
-        )}
-
-        {/* Orders */}
-        <div className="rounded-lg border">
-          <div className="p-6">
-            <h3 className="text-xl font-semibold">Orders</h3>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.order_date || "N/A"}</TableCell>
-                  <TableCell>{order.order_status || "N/A"}</TableCell>
-                  <TableCell>${order.total_price || "0.00"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </div>
 
-       {/* Shipments */}
-<div className="rounded-lg border">
-  <div className="p-6">
-    <h3 className="text-xl font-semibold">Shipments</h3>
-  </div>
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Shipment ID</TableHead>
-        <TableHead>Order ID</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Ship Date</TableHead>
-        <TableHead>No. of Items</TableHead> {/* New column header */}
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {shipments.map((shipment) => (
-        <TableRow key={shipment.id}>
-          <TableCell className="font-medium">{shipment.id}</TableCell>
-          <TableCell>{shipment.order_id || "N/A"}</TableCell>
-          <TableCell>{shipment.status || "N/A"}</TableCell>
-          <TableCell>{new Date(shipment.shipped_date).toLocaleDateString()}</TableCell>
-          <TableCell>
-            {shipment.items.reduce((total, item) => total + item.quantity, 0)} {/* Calculate and display total items */}
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</div>
-
+        <div className="rounded-md border p-4">
+          <h3 className="text-xl font-semibold mb-2">Shipment History</h3>
+          {isLoadingShipments ? (
+            <div>Loading shipments...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Shipment ID</TableHead>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {shipments.length > 0 ? (
+                    shipments.map((shipment: any) => (
+                      <TableRow key={shipment.id}>
+                        <TableCell>SHP{shipment.id}</TableCell>
+                        <TableCell>ORD{shipment.order_id}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">Shipped</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center">No shipments found for this customer.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
