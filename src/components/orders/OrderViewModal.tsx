@@ -18,6 +18,12 @@ interface OrderViewModalProps {
   onClose: () => void;
 }
 
+interface DueItem {
+  item_id: number;
+  quantity: number;
+  name?: string;
+}
+
 const OrderViewModal = ({
   order,
   isOpen,
@@ -36,7 +42,24 @@ const OrderViewModal = ({
       });
       
       if (!response.ok) throw new Error('Failed to fetch due items');
-      return response.json();
+      const items = await response.json();
+
+      // Fetch item details for each due item
+      const itemsWithDetails = await Promise.all(
+        items.map(async (item: DueItem) => {
+          const itemResponse = await fetch(`${config.apiUrl}/items/${item.item_id}`, {
+            headers: {
+              Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+              "Content-Type": "application/json",
+            },
+          });
+          if (!itemResponse.ok) return item;
+          const itemDetails = await itemResponse.json();
+          return { ...item, name: itemDetails.name };
+        })
+      );
+      
+      return itemsWithDetails;
     },
     enabled: !!order && order.status === 'shipped and due',
   });
@@ -78,6 +101,7 @@ const OrderViewModal = ({
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                   </tr>
@@ -87,6 +111,9 @@ const OrderViewModal = ({
                     <tr key={item.id}>
                       <td className="px-4 py-3">{item.name}</td>
                       <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">
+                        <span style={{ color: item.color }}>{item.color || 'N/A'}</span>
+                      </td>
                       <td className="px-4 py-3">${item.price.toFixed(2)}</td>
                       <td className="px-4 py-3">${(item.price * item.quantity).toFixed(2)}</td>
                     </tr>
@@ -106,14 +133,14 @@ const OrderViewModal = ({
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-red-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item Name</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Due</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {dueItems.map((item: { item_id: number; quantity: number }) => (
+                      {dueItems.map((item: DueItem) => (
                         <tr key={item.item_id}>
-                          <td className="px-4 py-3">{item.item_id}</td>
+                          <td className="px-4 py-3">{item.name || `Item #${item.item_id}`}</td>
                           <td className="px-4 py-3">{item.quantity}</td>
                         </tr>
                       ))}
@@ -132,3 +159,4 @@ const OrderViewModal = ({
 };
 
 export default OrderViewModal;
+
