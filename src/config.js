@@ -1,3 +1,5 @@
+
 export default {
-    apiUrl : 'https://oms-order-management.onrender.com'
+    apiUrl : 'https://oms-order-management.onrender.com',
+    shipmentEndpoint: '/shipment/rusty'
 }

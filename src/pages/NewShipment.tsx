@@ -12,14 +12,13 @@ const NewShipment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { orderId, selectedItems, orderDetails } = location.state || {};
+  const { orderId, selectedItems, orderDetails, isDueOrder } = location.state || {};
   const [loading, setLoading] = useState(false);
 
   if (!orderDetails) {
     return <div>No order details found</div>;
   }
 
-  // Filter selected items and get their full details
   const selectedOrderItems = orderDetails.items.filter((item) =>
     selectedItems.includes(item.id)
   );
@@ -28,9 +27,8 @@ const NewShipment = () => {
     setLoading(true);
 
     const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const formattedDate = currentDate.toISOString().split('T')[0];
 
-    // Construct the shipment data to match API expectations
     const shipmentData = {
       shipped_date: formattedDate,
       order_id: orderId,
@@ -42,13 +40,11 @@ const NewShipment = () => {
         price: item.price,
         quantity: item.quantity,
       })),
-      due_order_type: false,
+      due_order_type: isDueOrder ? true : false,
     };
 
-    console.log("Shipment request payload:", JSON.stringify(shipmentData, null, 2));
-
     try {
-      const response = await fetch(`${config.apiUrl}/shipments`, {
+      const response = await fetch(`${config.apiUrl}${config.shipmentEndpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,8 +83,8 @@ const NewShipment = () => {
         <h2 className="text-3xl font-bold tracking-tight">
           Create Shipment - {orderId}
         </h2>
-        <Button variant="outline" onClick={() => navigate("/orders")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
       </div>
 

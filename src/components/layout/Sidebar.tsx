@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   Users,
   Package,
+  Clock,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -16,6 +17,7 @@ const Sidebar = () => {
     { href: "/orders", label: "Orders", icon: ShoppingCart },
     { href: "/customers", label: "Customers", icon: Users },
     { href: "/shipments", label: "Shipments", icon: Package },
+    { href: "/due-orders", label: "Due Orders", icon: Clock },
   ];
 
   return (
