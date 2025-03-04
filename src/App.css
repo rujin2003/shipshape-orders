@@ -1,4 +1,3 @@
-
 #root {
   max-width: 100%;
   margin: 0 auto;
@@ -52,11 +51,10 @@
   }
   
   .truncate-mobile {
-    max-width: 120px;
+    max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: inline-block;
   }
   
   /* Mobile table layout for better visibility */
@@ -98,14 +96,13 @@
 /* Handle long text in tables */
 table td, table th {
   word-break: break-word;
-  max-width: 200px;
 }
 
 /* Make buttons more touch-friendly on mobile */
 @media (max-width: 640px) {
   button {
-    min-height: 36px;
-    min-width: 36px;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   /* Smaller create buttons on mobile */
@@ -125,14 +122,13 @@ table td, table th {
     padding: 6px 8px !important;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-    height: auto !important;
+    margin-left: 4px;
   }
   
   .create-action-button svg {
     width: 12px;
     height: 12px;
+    margin-right: 4px;
   }
 }
 

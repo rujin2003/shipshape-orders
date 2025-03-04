@@ -118,14 +118,15 @@ const Shipments = () => {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between mobile-title-spacing">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shipments</h2>
-        <Button 
-          onClick={handleCreateShipment}
-          size="sm" 
-          className="flex items-center gap-2 text-xs md:text-sm create-action-button"
-        >
-          <Package className="h-3 w-3 md:h-4 md:w-4" />
-          Create Shipment
-        </Button>
+        <button className="add-customer-button" onClick={handleCreateShipment}>
+          <span className="button_lg">
+            <span className="button_sl"></span>
+            <span className="button_text">
+              <Package className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 inline" />
+              Create Shipment
+            </span>
+          </span>
+        </button>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -149,7 +150,7 @@ const Shipments = () => {
                 {!isVerySmall && <TableHead>Items Count</TableHead>}
                 {!isVerySmall && <TableHead>Due Order</TableHead>}
                 <TableHead>Ship Date</TableHead>
-                <TableHead className="w-[80px]">Actions</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -167,8 +168,8 @@ const Shipments = () => {
                           )}
                         </TableCell>
                       )}
-                      <TableCell className="font-medium truncate-mobile" data-label="Shipment ID">SHP{shipment.id}</TableCell>
-                      <TableCell className="truncate-mobile" data-label="Order ID">ORD{shipment.order_id}</TableCell>
+                      <TableCell className="font-medium" data-label="Shipment ID">SHP{shipment.id}</TableCell>
+                      <TableCell data-label="Order ID">ORD{shipment.order_id}</TableCell>
                       {!isVerySmall && <TableCell data-label="Items Count">{shipment.items ? shipment.items.length : 0}</TableCell>}
                       {!isVerySmall && <TableCell data-label="Due Order">{shipment.due_order_type ? "True" : "False"}</TableCell>}
                       <TableCell data-label="Ship Date">
@@ -210,6 +211,129 @@ const Shipments = () => {
         onClose={() => setViewShipmentId(null)}
         onDownload={handleDownload}
       />
+
+      <style>
+        {`
+          .add-customer-button {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            border: none;
+            background: none;
+            color: #0f1923;
+            cursor: pointer;
+            position: relative;
+            padding: 8px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.15s ease;
+          }
+
+          .add-customer-button::before,
+          .add-customer-button::after {
+            content: '';
+            display: block;
+            position: absolute;
+            right: 0;
+            left: 0;
+            height: calc(50% - 5px);
+            border: 1px solid #7D8082;
+            transition: all 0.15s ease;
+          }
+
+          .add-customer-button::before {
+            top: 0;
+            border-bottom-width: 0;
+          }
+
+          .add-customer-button::after {
+            bottom: 0;
+            border-top-width: 0;
+          }
+
+          .add-customer-button:active,
+          .add-customer-button:focus {
+            outline: none;
+          }
+
+          .add-customer-button:active::before,
+          .add-customer-button:active::after {
+            right: 3px;
+            left: 3px;
+          }
+
+          .add-customer-button:active::before {
+            top: 3px;
+          }
+
+          .add-customer-button:active::after {
+            bottom: 3px;
+          }
+
+          .add-customer-button .button_lg {
+            position: relative;
+            display: block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #0f1923;
+            overflow: hidden;
+            box-shadow: inset 0px 0px 0px 1px transparent;
+          }
+
+          .add-customer-button .button_lg::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 2px;
+            background-color: #0f1923;
+          }
+
+          .add-customer-button .button_lg::after {
+            content: '';
+            display: block;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 4px;
+            height: 4px;
+            background-color: #0f1923;
+            transition: all 0.2s ease;
+          }
+
+          .add-customer-button .button_sl {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: -1px;
+            left: -8px;
+            width: 0;
+            background-color: #6495ED;
+            transform: skew(-15deg);
+            transition: all 0.2s ease;
+          }
+
+          .add-customer-button .button_text {
+            position: relative;
+          }
+
+          .add-customer-button:hover {
+            color: #0f1923;
+          }
+
+          .add-customer-button:hover .button_sl {
+            width: calc(100% + 15px);
+          }
+
+          .add-customer-button:hover .button_lg::after {
+            background-color: #fff;
+          }
+        `}
+      </style>
     </div>
   );
 };
