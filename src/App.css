@@ -1,4 +1,3 @@
-
 #root {
   max-width: 100%;
   margin: 0 auto;
@@ -81,7 +80,7 @@
   
   /* Fix for title overlapping with toggle button */
   .mobile-title-spacing {
-    padding-top: 2.5rem !important;
+    padding-top: 3rem !important;
     margin-bottom: 0.5rem !important;
   }
   
@@ -187,5 +186,32 @@ table td, table th {
   
   .modal-footer-actions button {
     width: 100% !important;
+  }
+}
+
+/* Fix for sidebar on all pages */
+.sidebar-visible {
+  margin-left: 240px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-visible {
+    margin-left: 0;
+  }
+}
+
+/* Fix for content positioning with sidebar */
+.content-with-sidebar {
+  transition: margin-left 0.3s ease;
+}
+
+/* Fix for the overlapping title issue */
+.mobile-title-spacing {
+  padding-top: 3rem !important;
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    margin-top: 2rem;
   }
 }

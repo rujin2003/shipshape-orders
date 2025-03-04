@@ -28,6 +28,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { href: "/due-orders", label: "Due Orders", icon: Clock },
   ];
 
+  // Add class to prevent sidebar from being hidden when it should be visible
+  const sidebarClass = isOpen 
+    ? "left-0" 
+    : "translate-x-[-100%] md:translate-x-[-240px]";
+
   return (
     <>
       {/* Mobile toggle button */}
@@ -50,9 +55,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed h-screen z-40 bg-white border-r shadow-sm transition-all duration-300 ease-in-out",
-        isOpen ? "left-0" : "-left-full md:-left-[240px]",
-        "w-[240px] md:w-[240px]"
+        "fixed h-screen z-40 bg-white border-r shadow-sm transition-transform duration-300 ease-in-out",
+        sidebarClass,
+        "w-[240px]"
       )}>
         <div className="p-6">
           <div className="mb-8 flex items-center justify-between">
@@ -73,7 +78,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       ? "bg-primary text-primary-foreground shadow-md"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground hover:shadow-sm"
                   )}
-                  onClick={() => toggleSidebar()}
+                  onClick={() => {
+                    if (window.innerWidth < 768) {
+                      toggleSidebar();
+                    }
+                  }}
                 >
                   <Icon className={cn("h-5 w-5", isActive ? "text-current" : "text-muted-foreground")} />
                   <span className="font-medium">{link.label}</span>
