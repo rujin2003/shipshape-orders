@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -82,20 +81,20 @@ const CustomerDetails = () => {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Customer Details</h2>
-        <Button variant="outline" onClick={() => navigate(-1)}>
+    <div className="flex-1 space-y-4 md:space-y-6 p-3 md:p-8 pt-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Customer Details</h2>
+        <Button variant="outline" onClick={() => navigate(-1)} className="self-start">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="md:pb-2">
           <CardTitle>Personal Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Name</p>
               <p className="text-lg font-medium">{customerData.name}</p>
@@ -122,13 +121,13 @@ const CustomerDetails = () => {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xl font-bold">Orders</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 overflow-x-auto">
             {isLoadingOrders ? (
               <div>Loading orders...</div>
             ) : (
@@ -169,7 +168,7 @@ const CustomerDetails = () => {
             <CardTitle className="text-xl font-bold">Shipments</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 overflow-x-auto">
             {isLoadingShipments ? (
               <div>Loading shipments...</div>
             ) : (

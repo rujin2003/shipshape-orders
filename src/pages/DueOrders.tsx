@@ -50,19 +50,19 @@ const DueOrders = () => {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 space-y-4 p-3 md:p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Due Orders</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Due Orders</h2>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Order ID</TableHead>
               <TableHead>Customer</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Items Count</TableHead>
+              <TableHead className="hidden md:table-cell">Due Date</TableHead>
+              <TableHead className="hidden md:table-cell">Items</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -70,12 +70,12 @@ const DueOrders = () => {
             {dueOrders.length > 0 ? (
               dueOrders.map((order: any) => (
                 <TableRow key={order.id}>
-                  <TableCell>ORD{order.id}</TableCell>
-                  <TableCell>{order.customer_name}</TableCell>
-                  <TableCell>{new Date(order.shipment_due).toLocaleDateString()}</TableCell>
-                  <TableCell>{order.items?.length || 0}</TableCell>
+                  <TableCell className="font-medium">ORD{order.id}</TableCell>
+                  <TableCell className="max-w-[120px] md:max-w-none truncate">{order.customer_name}</TableCell>
+                  <TableCell className="hidden md:table-cell">{new Date(order.shipment_due).toLocaleDateString()}</TableCell>
+                  <TableCell className="hidden md:table-cell">{order.items?.length || 0}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-1 md:space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"

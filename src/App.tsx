@@ -14,34 +14,49 @@ import Shipments from "./pages/Shipments";
 import NewShipment from "./pages/NewShipment";
 import CreateShipment from "./pages/CreateShipment";
 import DueOrders from "./pages/DueOrders";
+import { useMediaQuery } from "./hooks/useMediaQuery";
+import { useState, useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="flex min-h-screen overflow-hidden bg-gray-50">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-6">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/orders/new" element={<NewOrderForm />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/customers/:id" element={<CustomerDetails />} />
-              <Route path="/shipments" element={<Shipments />} />
-              <Route path="/shipments/new" element={<NewShipment />} />
-              <Route path="/shipments/create" element={<CreateShipment />} />
-              <Route path="/due-orders" element={<DueOrders />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
+
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="flex min-h-screen overflow-hidden bg-gray-50">
+            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+            <main className={`flex-1 overflow-y-auto transition-all duration-200 ${sidebarOpen && !isMobile ? 'ml-[240px]' : 'ml-0'}`}>
+              <div className="p-3 md:p-6">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/orders/new" element={<NewOrderForm />} />
+                  <Route path="/customers" element={<Customers />} />
+                  <Route path="/customers/:id" element={<CustomerDetails />} />
+                  <Route path="/shipments" element={<Shipments />} />
+                  <Route path="/shipments/new" element={<NewShipment />} />
+                  <Route path="/shipments/create" element={<CreateShipment />} />
+                  <Route path="/due-orders" element={<DueOrders />} />
+                </Routes>
+              </div>
+            </main>
+          </div>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

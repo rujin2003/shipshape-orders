@@ -78,12 +78,12 @@ const NewShipment = () => {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">
+    <div className="flex-1 space-y-4 p-3 md:p-8 pt-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <h2 className="text-xl md:text-3xl font-bold tracking-tight truncate">
           Create Shipment - {orderId}
         </h2>
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate(-1)} className="self-start">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
       </div>
@@ -97,40 +97,44 @@ const NewShipment = () => {
             <div>
               <h3 className="font-semibold mb-2">Customer Information</h3>
               <p><strong>Name:</strong> {orderDetails.customer_name}</p>
-              <p><strong>Address:</strong> {orderDetails.shipment_address}</p>
+              <p className="break-words"><strong>Address:</strong> {orderDetails.shipment_address}</p>
             </div>
 
             <div>
               <h3 className="font-semibold mb-2">Items to Ship</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Color</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Price</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedOrderItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
-                      <TableCell>{item.size}</TableCell>
-                      <TableCell>{item.color}</TableCell>
-                      <TableCell>{item.quantity}</TableCell>
-                      <TableCell>${item.price.toFixed(2)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="overflow-x-auto -mx-4 md:mx-0">
+                <div className="inline-block min-w-full align-middle p-4 md:p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead>Size</TableHead>
+                        <TableHead>Color</TableHead>
+                        <TableHead>Qty</TableHead>
+                        <TableHead>Price</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedOrderItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="max-w-[120px] md:max-w-none truncate">{item.name}</TableCell>
+                          <TableCell>{item.size}</TableCell>
+                          <TableCell>{item.color}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>${item.price.toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end">
               <Button
                 onClick={handleCreateShipment}
                 disabled={loading}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg shadow-md transition-transform transform hover:scale-105"
+                className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 {loading ? "Creating..." : "Create Shipment"}
               </Button>
