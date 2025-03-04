@@ -57,6 +57,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  
+  /* Mobile table layout for better visibility */
+  .mobile-table-layout {
+    font-size: 12px;
+  }
+  
+  .mobile-table-layout th,
+  .mobile-table-layout td {
+    padding: 8px 4px !important;
+  }
 }
 
 /* Fix for mobile padding */
@@ -67,6 +77,20 @@
   
   .card .mobile-p-adjust {
     padding: 1rem !important;
+  }
+  
+  /* Fix for title overlapping with toggle button */
+  .mobile-title-spacing {
+    padding-top: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Make action buttons smaller on mobile */
+  .mobile-btn-sm {
+    padding: 6px !important;
+    min-height: 32px !important;
+    min-width: 32px !important;
+    font-size: 12px !important;
   }
 }
 
@@ -80,5 +104,44 @@ table td, table th {
   button {
     min-height: 44px;
     min-width: 44px;
+  }
+  
+  /* Smaller create buttons on mobile */
+  .add-customer-button .button_lg {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .add-customer-button {
+    padding: 4px !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+/* Stacked layout for mobile tables */
+@media (max-width: 500px) {
+  .mobile-stacked-table thead {
+    display: none;
+  }
+  
+  .mobile-stacked-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .mobile-stacked-table td {
+    display: flex;
+    text-align: left;
+    padding: 4px 8px !important;
+    border: none !important;
+  }
+  
+  .mobile-stacked-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    width: 40%;
+    margin-right: 8px;
   }
 }

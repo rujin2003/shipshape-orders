@@ -8,13 +8,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Package, Search, ChevronDown, ChevronRight, Download, Eye } from "lucide-react";
+import { Package, Search, ChevronDown, ChevronRight, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import config from '@/config';
 import { Button } from "@/components/ui/button";
 import ShipmentViewModal from "@/components/shipments/ShipmentViewModal";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ShipmentItem {
   id: number;
@@ -38,6 +39,8 @@ const Shipments = () => {
   const navigate = useNavigate();
   const AUTH_TOKEN = "04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK";
   const [viewShipmentId, setViewShipmentId] = useState<number | null>(null);
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isVerySmall = useMediaQuery("(max-width: 500px)");
 
   useEffect(() => {
     const fetchShipments = async () => {
@@ -112,14 +115,14 @@ const Shipments = () => {
   );
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Shipments</h2>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between mobile-title-spacing">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shipments</h2>
         <button className="add-customer-button" onClick={handleCreateShipment}>
           <span className="button_lg">
             <span className="button_sl"></span>
             <span className="button_text">
-              <Package className="mr-2 h-4 w-4 inline" />
+              <Package className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 inline" />
               Create Shipment
             </span>
           </span>
@@ -137,64 +140,69 @@ const Shipments = () => {
       </div>
 
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]"></TableHead>
-              <TableHead>Shipment ID</TableHead>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Items Count</TableHead>
-              <TableHead>Due Order</TableHead>
-              <TableHead>Ship Date</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredShipments.length > 0 ? (
-              filteredShipments.map((shipment) => (
-                <React.Fragment key={shipment.id}>
-                  <TableRow className="cursor-pointer">
-                    <TableCell>
-                      {expandedShipment === shipment.id ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">SHP{shipment.id}</TableCell>
-                    <TableCell>ORD{shipment.order_id}</TableCell>
-                    <TableCell>{shipment.items ? shipment.items.length : 0}</TableCell>
-                    <TableCell>{shipment.due_order_type ? "True" : "False"}</TableCell>
-                    <TableCell>
-                      {shipment.shipped_date ? new Date(shipment.shipped_date).toLocaleDateString() : "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setViewShipmentId(shipment.id);
-                        }}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              ))
-            ) : (
+        <div className={`${isMobile ? "responsive-table mobile-table-layout" : ""} ${isVerySmall ? "mobile-stacked-table" : ""}`}>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
-                  <div className="flex items-center justify-center space-x-4">
-                    <span>No shipments found.</span>
-                  </div>
-                </TableCell>
+                {!isVerySmall && <TableHead className="w-[50px]"></TableHead>}
+                <TableHead>Shipment ID</TableHead>
+                <TableHead>Order ID</TableHead>
+                {!isVerySmall && <TableHead>Items Count</TableHead>}
+                {!isVerySmall && <TableHead>Due Order</TableHead>}
+                <TableHead>Ship Date</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {filteredShipments.length > 0 ? (
+                filteredShipments.map((shipment) => (
+                  <React.Fragment key={shipment.id}>
+                    <TableRow className="cursor-pointer" onClick={() => isVerySmall ? setViewShipmentId(shipment.id) : toggleShipmentDetails(shipment.id)}>
+                      {!isVerySmall && (
+                        <TableCell>
+                          {expandedShipment === shipment.id ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium" data-label="Shipment ID">SHP{shipment.id}</TableCell>
+                      <TableCell data-label="Order ID">ORD{shipment.order_id}</TableCell>
+                      {!isVerySmall && <TableCell data-label="Items Count">{shipment.items ? shipment.items.length : 0}</TableCell>}
+                      {!isVerySmall && <TableCell data-label="Due Order">{shipment.due_order_type ? "True" : "False"}</TableCell>}
+                      <TableCell data-label="Ship Date">
+                        {shipment.shipped_date ? new Date(shipment.shipped_date).toLocaleDateString() : "N/A"}
+                      </TableCell>
+                      <TableCell data-label="Actions">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="mobile-btn-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewShipmentId(shipment.id);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={isVerySmall ? 4 : 7} className="text-center">
+                    <div className="flex items-center justify-center space-x-4">
+                      <span>No shipments found.</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <ShipmentViewModal

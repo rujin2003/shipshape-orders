@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import OrderList from "@/components/orders/OrderList";
 import config from '@/config';
 import { Order } from "@/types/order";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -16,6 +17,7 @@ const Orders = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -84,8 +86,8 @@ const Orders = () => {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
+      <div className="flex items-center justify-between mobile-title-spacing">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Orders</h2>
         <button
           className="add-customer-button"
           onClick={() => navigate(`/orders/new`)}
@@ -93,7 +95,7 @@ const Orders = () => {
           <span className="button_lg">
             <span className="button_sl"></span>
             <span className="button_text">
-              <Package className="mr-2 h-4 w-4 inline" />
+              <Package className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 inline" />
               Create Order
             </span>
           </span>
@@ -112,62 +114,64 @@ const Orders = () => {
 
       <div className="rounded-md border">
         {orders.length > 0 ? (
-          <OrderList
-            orders={orders}
-            expandedOrder={expandedOrder}
-            onOrderClick={(orderId) =>
-              setExpandedOrder(expandedOrder === orderId ? null : orderId)
-            }
-            onEditOrder={(orderId) => navigate(`/orders/${orderId}/edit`)}
-            selectedItems={selectedItems}
-            onItemSelect={(itemId) =>
-              setSelectedItems(prev =>
-                prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
-              )
-            }
-            onDeleteOrder={async (orderId) => {
-              try {
-                const order = orders.find((o) => o.id === orderId);
-                if (!order) {
+          <div className={isMobile ? "responsive-table mobile-table-layout" : ""}>
+            <OrderList
+              orders={orders}
+              expandedOrder={expandedOrder}
+              onOrderClick={(orderId) =>
+                setExpandedOrder(expandedOrder === orderId ? null : orderId)
+              }
+              onEditOrder={(orderId) => navigate(`/orders/${orderId}/edit`)}
+              selectedItems={selectedItems}
+              onItemSelect={(itemId) =>
+                setSelectedItems(prev =>
+                  prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
+                )
+              }
+              onDeleteOrder={async (orderId) => {
+                try {
+                  const order = orders.find((o) => o.id === orderId);
+                  if (!order) {
+                    toast({
+                      title: "Error",
+                      description: "Order not found.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  const response = await fetch(`${config.apiUrl}/orders/${order.id}`, {
+                    method: "DELETE",
+                    headers: {
+                      Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
+                      "Content-Type": "application/json",
+                    },
+                  });
+
+                  if (!response.ok) throw new Error(`Failed to delete order with ID: ${order.id}`);
+
+                  toast({
+                    title: "Order Deleted",
+                    description: "The order has been successfully deleted.",
+                  });
+
+                  setOrders((prevOrders) => prevOrders.filter((o) => o.id !== orderId));
+
+                  if (expandedOrder === orderId) {
+                    setExpandedOrder(null);
+                  }
+                } catch (error) {
+                  console.error("Error deleting order:", error);
                   toast({
                     title: "Error",
-                    description: "Order not found.",
+                    description: "Failed to delete the order. Please try again.",
                     variant: "destructive",
                   });
-                  return;
                 }
-
-                const response = await fetch(`${config.apiUrl}/orders/${order.id}`, {
-                  method: "DELETE",
-                  headers: {
-                    Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-                    "Content-Type": "application/json",
-                  },
-                });
-
-                if (!response.ok) throw new Error(`Failed to delete order with ID: ${order.id}`);
-
-                toast({
-                  title: "Order Deleted",
-                  description: "The order has been successfully deleted.",
-                });
-
-                setOrders((prevOrders) => prevOrders.filter((o) => o.id !== orderId));
-
-                if (expandedOrder === orderId) {
-                  setExpandedOrder(null);
-                }
-              } catch (error) {
-                console.error("Error deleting order:", error);
-                toast({
-                  title: "Error",
-                  description: "Failed to delete the order. Please try again.",
-                  variant: "destructive",
-                });
-              }
-            }}
-            searchQuery={searchQuery}
-          />
+              }}
+              searchQuery={searchQuery}
+            />
+          </div>
         ) : (
           <div className="flex justify-center items-center p-4">
             <p className="text-gray-500 italic">No orders</p>

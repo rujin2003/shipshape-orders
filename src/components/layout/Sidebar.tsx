@@ -35,7 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         variant="ghost" 
         size="icon" 
         onClick={toggleSidebar} 
-        className="fixed top-4 left-4 z-50 md:hidden"
+        className="fixed top-2 left-2 z-50 md:hidden"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
