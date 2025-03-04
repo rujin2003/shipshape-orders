@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Package, AlertCircle } from "lucide-react";
@@ -89,7 +90,7 @@ const Orders = () => {
       <div className="flex items-center justify-between mobile-title-spacing">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Orders</h2>
         <button
-          className="add-customer-button"
+          className="add-customer-button create-action-button"
           onClick={() => navigate(`/orders/new`)}
         >
           <span className="button_lg">

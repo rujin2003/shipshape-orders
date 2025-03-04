@@ -116,6 +116,21 @@ table td, table th {
     padding: 4px !important;
     margin-bottom: 10px !important;
   }
+  
+  /* Create Order/Shipment button mobile styling */
+  .create-action-button {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+  }
+  
+  .create-action-button svg {
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+  }
 }
 
 /* Stacked layout for mobile tables */
@@ -143,5 +158,34 @@ table td, table th {
     font-weight: 600;
     width: 40%;
     margin-right: 8px;
+  }
+}
+
+/* Modal responsive styling */
+@media (max-width: 640px) {
+  .modal-responsive-content {
+    padding: 12px !important;
+    max-height: 85vh !important;
+    margin: 10px !important;
+  }
+  
+  .modal-responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .modal-responsive-table th,
+  .modal-responsive-table td {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+  
+  .modal-footer-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .modal-footer-actions button {
+    width: 100% !important;
   }
 }
