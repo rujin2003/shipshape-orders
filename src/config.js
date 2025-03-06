@@ -1,6 +1,7 @@
 
 export default {
-    apiUrl : 'https://oms-order-management.onrender.com',
+    apiUrl: 'https://oms-order-management.onrender.com',
     createShipmentEndpoint: '/shipments',
-    customerShipmentEndpoint: '/shipment'
+    customerShipmentEndpoint: '/shipment',
+    loginEndpoint: '/login'
 }
