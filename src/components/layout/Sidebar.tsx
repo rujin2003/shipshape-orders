@@ -9,8 +9,12 @@ import {
   Clock,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logoutUser } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,6 +23,13 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
 
   const links = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -59,12 +70,18 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         sidebarClass,
         "w-[240px]"
       )}>
-        <div className="p-6">
-          <div className="mb-8 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary">Order Manager</h1>
-            <X className="h-5 w-5 cursor-pointer md:hidden" onClick={toggleSidebar} />
+        <div className="p-6 flex flex-col h-full">
+          <div className="mb-6 flex flex-col items-center">
+            <img 
+              src="/lovable-uploads/d7abebe9-6cd0-4667-b353-03d16b777b82.png" 
+              alt="Aaha Felt Logo" 
+              className="h-16 mb-2" 
+            />
+            <h1 className="text-xl font-bold text-primary">Aaha Felt</h1>
+            <p className="text-xs text-gray-500 mt-1">Order Management System</p>
           </div>
-          <nav className="space-y-3">
+          
+          <nav className="space-y-3 flex-grow">
             {links.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.href;
@@ -90,6 +107,22 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               );
             })}
           </nav>
+          
+          <div className="mt-auto pt-4 border-t">
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </Button>
+            
+            <div className="text-xs text-center text-gray-500 mt-4">
+              <p>Aaha Felt</p>
+              <p>Tokha 44600, Kathmandu, Nepal</p>
+            </div>
+          </div>
         </div>
       </div>
     </>

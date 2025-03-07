@@ -26,7 +26,6 @@ const Login = () => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   
-
   const from = location.state?.from?.pathname || "/";
 
   const form = useForm<LoginFormValues>({
@@ -46,7 +45,6 @@ const Login = () => {
           Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
         },
         method: "POST",
-      
         body: JSON.stringify({
           username: data.username,
           password: data.password,
@@ -59,7 +57,6 @@ const Login = () => {
 
       const responseData = await response.json();
       
-     
       loginUser(data.username, responseData.token || "dummy-token");
       
       toast.success("Login successful");
@@ -75,10 +72,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="mb-6 text-center">
+        <img 
+          src="/lovable-uploads/d7abebe9-6cd0-4667-b353-03d16b777b82.png" 
+          alt="Aaha Felt Logo" 
+          className="mx-auto mb-4 h-24 md:h-32"
+        />
+      </div>
+      
+      <Card className="w-full max-w-md border-t-4 border-t-primary shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Order Manager</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Order Management System</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to sign in to your account
           </CardDescription>
@@ -120,10 +125,14 @@ const Login = () => {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col gap-2 text-center">
           <p className="text-sm text-muted-foreground">
             Secure login to access the Order Management System
           </p>
+          <div className="text-xs text-gray-500 mt-2">
+            Aaha Felt &copy; {new Date().getFullYear()}
+            <p>Tokha 44600, Kathmandu, Nepal</p>
+          </div>
         </CardFooter>
       </Card>
     </div>
