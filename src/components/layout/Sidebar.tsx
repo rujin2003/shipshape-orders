@@ -75,9 +75,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             <img 
               src="/lovable-uploads/d7abebe9-6cd0-4667-b353-03d16b777b82.png" 
               alt="Aaha Felt Logo" 
-              className="h-16 mb-2" 
+              className="h-20 mb-2" 
             />
-            <h1 className="text-xl font-bold text-primary">Aaha Felt</h1>
             <p className="text-xs text-gray-500 mt-1">Order Management System</p>
           </div>
           
@@ -119,7 +118,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </Button>
             
             <div className="text-xs text-center text-gray-500 mt-4">
-              <p>Aaha Felt</p>
               <p>Tokha 44600, Kathmandu, Nepal</p>
             </div>
           </div>
