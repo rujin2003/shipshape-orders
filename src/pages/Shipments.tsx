@@ -334,7 +334,7 @@ const Shipments = () => {
     }
 
     /* Responsive Styles */
-    @media (max-width: 640px) {
+    @media (max-width: 550px) {
       .add-customer-button {
         padding: 5px 10px;
         font-size: 12px;

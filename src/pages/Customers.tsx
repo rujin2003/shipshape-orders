@@ -156,7 +156,7 @@ const Customers = () => {
         </div>
       )}
       <style>
-        {`
+  {`
     .add-customer-button {
       -moz-appearance: none;
       -webkit-appearance: none;
@@ -166,7 +166,7 @@ const Customers = () => {
       color: #0f1923;
       cursor: pointer;
       position: relative;
-      padding: 8px;
+      padding: 8px 12px;
       margin-bottom: 20px;
       text-transform: uppercase;
       font-weight: bold;
@@ -275,8 +275,28 @@ const Customers = () => {
     .add-customer-button:hover .button_lg::after {
       background-color: #fff;
     }
+
+    /* Responsive Styles */
+    @media (max-width: 550px) {
+      .add-customer-button {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+
+      .add-customer-button .button_lg {
+        padding: 6px 14px;
+      }
+
+      .add-customer-button .button_text {
+        font-size: 12px;
+      }
+
+      .add-customer-button .button_sl {
+        left: -5px;
+      }
+    }
   `}
-      </style>
+</style>
     </div>
   );
 };
