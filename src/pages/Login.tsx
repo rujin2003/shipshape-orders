@@ -26,7 +26,7 @@ const Login = () => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Get the intended destination from query params or default to dashboard
+
   const from = location.state?.from?.pathname || "/";
 
   const form = useForm<LoginFormValues>({
@@ -42,10 +42,11 @@ const Login = () => {
     
     try {
       const response = await fetch(`${config.apiUrl}/login`, {
-        method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
         },
+        method: "POST",
+      
         body: JSON.stringify({
           username: data.username,
           password: data.password,
@@ -58,7 +59,7 @@ const Login = () => {
 
       const responseData = await response.json();
       
-      // Store the login info with the token
+     
       loginUser(data.username, responseData.token || "dummy-token");
       
       toast.success("Login successful");
