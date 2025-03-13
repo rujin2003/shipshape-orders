@@ -66,7 +66,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed h-screen z-40 bg-[#FEF5E7] border-r shadow-sm transition-transform duration-300 ease-in-out",
+        "fixed h-screen z-40 bg-white border-r shadow-sm transition-transform duration-300 ease-in-out",
         sidebarClass,
         "w-[240px]"
       )}>
@@ -75,9 +75,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             <img 
               src="/lovable-uploads/d7abebe9-6cd0-4667-b353-03d16b777b82.png" 
               alt="Aaha Felt Logo" 
-              className="h-24 mb-2" 
+              className="h-20 mb-2" 
             />
-            <p className="text-xs text-gray-600 mt-1">Order Management System</p>
+            <p className="text-xs text-gray-500 mt-1">Order Management System</p>
           </div>
           
           <nav className="space-y-3 flex-grow">
@@ -91,8 +91,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-200",
                     isActive
-                      ? "bg-[#FDE1D3] text-gray-800 shadow-md"
-                      : "text-gray-700 hover:bg-[#FFDEE2] hover:text-gray-800 hover:shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground hover:shadow-sm"
                   )}
                   onClick={() => {
                     if (window.innerWidth < 768) {
@@ -100,24 +100,24 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     }
                   }}
                 >
-                  <Icon className={cn("h-5 w-5", isActive ? "text-current" : "text-gray-600")} />
+                  <Icon className={cn("h-5 w-5", isActive ? "text-current" : "text-muted-foreground")} />
                   <span className="font-medium">{link.label}</span>
                 </Link>
               );
             })}
           </nav>
           
-          <div className="mt-auto pt-4 border-t border-[#FEC6A1]">
+          <div className="mt-auto pt-4 border-t">
             <Button 
               variant="outline" 
-              className="w-full flex items-center justify-center gap-2 bg-[#D3E4FD] text-gray-700 border-[#D3E4FD] hover:bg-[#E5DEFF] hover:text-gray-800"
+              className="w-full flex items-center justify-center gap-2"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
               <span>Sign Out</span>
             </Button>
             
-            <div className="text-xs text-center text-gray-600 mt-4">
+            <div className="text-xs text-center text-gray-500 mt-4">
               <p>Tokha 44600, Kathmandu, Nepal</p>
             </div>
           </div>
