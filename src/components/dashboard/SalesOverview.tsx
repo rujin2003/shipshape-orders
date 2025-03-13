@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Package, ShoppingCart, Users, AlertCircle, RefreshCcw } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Users, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading";
 import config from '@/config';
@@ -27,6 +27,9 @@ const SalesOverview = () => {
     pendingShipments: "0",
   });
 
+  const currentDate = new Date();
+  const [year, setYear] = useState<number>(currentDate.getFullYear());
+  const [month, setMonth] = useState<number>(currentDate.getMonth() + 1); // JavaScript months are 0-indexed
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,8 +43,11 @@ const SalesOverview = () => {
         'Content-Type': 'application/json',
       };
 
+      // Format month as two digits
+      const formattedMonth = month.toString().padStart(2, '0');
+
       const [salesRes, customersRes, orderRes, pendingRes] = await Promise.all([
-        fetch(`${config.apiUrl}/totalSales`, { method: 'GET', headers }),
+        fetch(`${config.apiUrl}/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/customer/totalCount`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/order/totalordercount`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/orders/pending-count`, { method: 'GET', headers }),
@@ -73,14 +79,44 @@ const SalesOverview = () => {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [year, month]);
+
+  const prevMonth = () => {
+    if (month === 1) {
+      setMonth(12);
+      setYear(year - 1);
+    } else {
+      setMonth(month - 1);
+    }
+  };
+
+  const nextMonth = () => {
+    if (month === 12) {
+      setMonth(1);
+      setYear(year + 1);
+    } else {
+      setMonth(month + 1);
+    }
+  };
+
+  const resetToCurrentMonth = () => {
+    const now = new Date();
+    setMonth(now.getMonth() + 1);
+    setYear(now.getFullYear());
+  };
+
+  // Helper function to get month name
+  const getMonthName = (monthNumber: number) => {
+    const date = new Date(2000, monthNumber - 1, 1);
+    return date.toLocaleString('default', { month: 'long' });
+  };
 
   const statsConfig = [
     {
       title: "Total Sales",
       value: stats.totalSales,
       icon: DollarSign,
-      description: "Total sales this month",
+      description: `Sales for ${getMonthName(month)} ${year}`,
     },
     {
       title: "Orders",
@@ -136,26 +172,49 @@ const SalesOverview = () => {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {statsConfig.map((stat) => {
-        const Icon = stat.icon;
-        return (
-          <Card key={stat.title} className="transition-all duration-200 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <Icon className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
-        );
-      })}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={prevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="font-medium">
+            {getMonthName(month)} {year}
+          </span>
+          <Button variant="outline" size="sm" onClick={nextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={resetToCurrentMonth}
+        >
+          Current Month
+        </Button>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {statsConfig.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.title} className="transition-all duration-200 hover:shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <Icon className="h-5 w-5 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">{stat.value}</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };
