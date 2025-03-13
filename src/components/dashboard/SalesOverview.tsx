@@ -19,6 +19,18 @@ interface StatsData {
   pendingShipments: string;
 }
 
+interface SalesData {
+  month: number;
+  total_sales: number;
+  year: number;
+}
+
+interface OrdersData {
+  month: number;
+  total_orders: number;
+  year: number;
+}
+
 const SalesOverview = () => {
   const [stats, setStats] = useState<StatsData>({
     totalSales: "$0",
@@ -46,10 +58,10 @@ const SalesOverview = () => {
       // Format month as two digits
       const formattedMonth = month.toString().padStart(2, '0');
 
-      const [salesRes, customersRes, orderRes, pendingRes] = await Promise.all([
-        fetch(`${config.apiUrl}api/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
+      const [salesRes, orderRes, customersRes, pendingRes] = await Promise.all([
+        fetch(`${config.apiUrl}/api/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
+        fetch(`${config.apiUrl}/api/orders/${year}/${formattedMonth}`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/customer/totalCount`, { method: 'GET', headers }),
-        fetch(`${config.apiUrl}/order/totalordercount`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/orders/pending-count`, { method: 'GET', headers }),
       ]);
 
@@ -57,14 +69,14 @@ const SalesOverview = () => {
         throw new Error("Failed to fetch some statistics.");
       }
 
-      const salesData = await salesRes.json();
+      const salesData: SalesData = await salesRes.json();
+      const ordersData: OrdersData = await orderRes.json();
       const customersData = await customersRes.json();
       const pendingData = await pendingRes.json();
-      const orderData = await orderRes.json();
 
       setStats({
         totalSales: `$${(salesData.total_sales || 0).toLocaleString()}`,
-        totalOrders: `${orderData.total_order_count}`,
+        totalOrders: `${ordersData.total_orders || 0}`,
         totalCustomers: `${customersData || 0}`,
         pendingShipments: `${pendingData.pending_order_count || 0}`,
       });
@@ -122,7 +134,7 @@ const SalesOverview = () => {
       title: "Orders",
       value: stats.totalOrders,
       icon: ShoppingCart,
-      description: "Total orders this month",
+      description: `Orders for ${getMonthName(month)} ${year}`,
     },
     {
       title: "Customers",
