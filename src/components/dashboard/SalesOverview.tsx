@@ -47,7 +47,7 @@ const SalesOverview = () => {
       const formattedMonth = month.toString().padStart(2, '0');
 
       const [salesRes, customersRes, orderRes, pendingRes] = await Promise.all([
-        fetch(`${config.apiUrl}/api/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
+        fetch(`${config.apiUrl}/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/customer/totalCount`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/order/totalordercount`, { method: 'GET', headers }),
         fetch(`${config.apiUrl}/orders/pending-count`, { method: 'GET', headers }),
