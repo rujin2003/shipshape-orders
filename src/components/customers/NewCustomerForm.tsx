@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -14,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import config from '@/config';
+import { API_ENDPOINTS, getAuthHeader } from "@/constants/apiEndpoints";
 
 interface NewCustomerFormProps {
   onCancel: () => void;
@@ -53,12 +52,9 @@ const NewCustomerForm = ({ onCancel }: NewCustomerFormProps) => {
         phone: parseInt(values.number, 10),
       };
 
-      const response = await fetch(`${config.apiUrl}/customers`, {
+      const response = await fetch(API_ENDPOINTS.CUSTOMERS.CREATE, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeader(),
         body: JSON.stringify(customerData),
       });
 

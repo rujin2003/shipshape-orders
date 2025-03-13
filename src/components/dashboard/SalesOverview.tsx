@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Package, ShoppingCart, Users, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading";
-import config from '@/config';
+import { API_ENDPOINTS, getAuthHeader } from "@/constants/apiEndpoints";
 
 interface StatsData {
   totalSales: string;
@@ -50,19 +49,16 @@ const SalesOverview = () => {
     setError(null);
 
     try {
-      const headers = {
-        'Authorization': `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-        'Content-Type': 'application/json',
-      };
+      const headers = getAuthHeader();
 
       // Format month as two digits
       const formattedMonth = month.toString().padStart(2, '0');
 
       const [salesRes, orderRes, customersRes, pendingRes] = await Promise.all([
-        fetch(`${config.apiUrl}/api/sales/${year}/${formattedMonth}`, { method: 'GET', headers }),
-        fetch(`${config.apiUrl}/api/orders/${year}/${formattedMonth}`, { method: 'GET', headers }),
-        fetch(`${config.apiUrl}/customer/totalCount`, { method: 'GET', headers }),
-        fetch(`${config.apiUrl}/orders/pending-count`, { method: 'GET', headers }),
+        fetch(API_ENDPOINTS.SALES.GET_MONTHLY_SALES(year, formattedMonth), { method: 'GET', headers }),
+        fetch(API_ENDPOINTS.ORDERS.GET_MONTHLY_ORDERS(year, formattedMonth), { method: 'GET', headers }),
+        fetch(API_ENDPOINTS.CUSTOMERS.GET_TOTAL_COUNT, { method: 'GET', headers }),
+        fetch(API_ENDPOINTS.ORDERS.GET_PENDING_COUNT, { method: 'GET', headers }),
       ]);
 
       if (!salesRes.ok || !customersRes.ok || !pendingRes.ok || !orderRes.ok) {
@@ -117,7 +113,6 @@ const SalesOverview = () => {
     setYear(now.getFullYear());
   };
 
-  // Helper function to get month name
   const getMonthName = (monthNumber: number) => {
     const date = new Date(2000, monthNumber - 1, 1);
     return date.toLocaleString('default', { month: 'long' });

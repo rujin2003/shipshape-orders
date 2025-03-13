@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import config from '@/config';
+import { API_ENDPOINTS, getAuthHeader } from "@/constants/apiEndpoints";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -54,12 +54,9 @@ const EditCustomerForm = ({ customer, onCancel }: EditCustomerFormProps) => {
     try {
     
       const payload = { ...values, numbere: values.number.trim() };
-      const response = await fetch(`${config.apiUrl}/customers/${customer.id}`, {
+      const response = await fetch(API_ENDPOINTS.CUSTOMERS.UPDATE(customer.id), {
         method: "PUT",
-        headers: {
-          "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeader(),
         body: JSON.stringify(payload),
       });
 
@@ -85,7 +82,7 @@ const EditCustomerForm = ({ customer, onCancel }: EditCustomerFormProps) => {
           </FormItem>
         )} />
 
-      <FormField control={form.control} name="number" render={({ field }) => (
+        <FormField control={form.control} name="number" render={({ field }) => (
           <FormItem>
             <FormLabel>Phone</FormLabel>
             <FormControl>

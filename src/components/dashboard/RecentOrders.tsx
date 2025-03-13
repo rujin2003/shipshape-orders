@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -13,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { AlertCircle, RefreshCcw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import config from '@/config';
+import { API_ENDPOINTS, getAuthHeader } from "@/constants/apiEndpoints";
 
 interface Order {
   id: number;
@@ -33,12 +32,9 @@ const RecentOrders = () => {
     setError(null);
     
     try {
-      const headers = {
-        "Authorization": `Bearer 04XU8TeSj90dCX4b1_3fhZqolR7aFOZ_UWEUUHOSFRK`,
-        "Content-Type": "application/json",
-      };
+      const headers = getAuthHeader();
 
-      const response = await fetch(`${config.apiUrl}/orders/recentorders`, {
+      const response = await fetch(API_ENDPOINTS.ORDERS.GET_RECENT_ORDERS, {
         method: "GET",
         headers,
       });
